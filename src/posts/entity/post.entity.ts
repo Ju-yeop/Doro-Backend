@@ -1,9 +1,9 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { IsInt, IsString } from 'class-validator';
 import { Comment } from 'src/comments/comment.entity';
 import { Core } from 'src/common/entity/core.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
-
+@InputType('CreatePostInput', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class Post extends Core {
@@ -25,7 +25,7 @@ export class Post extends Core {
   @Column({ default: null })
   @Field((type) => Number, { nullable: true })
   @IsInt()
-  owenrId: number;
+  owenrId?: number;
 
   @OneToMany((type) => Comment, (comment) => comment.post, {
     eager: true,

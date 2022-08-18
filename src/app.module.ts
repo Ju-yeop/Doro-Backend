@@ -9,6 +9,7 @@ import { User } from './users/entities/user.entity';
 import { PostModule } from './posts/posts.module';
 import { Comment } from './comments/comment.entity';
 import { Post } from './posts/entity/post.entity';
+import { PostService } from './posts/posts.service';
 
 @Module({
   imports: [
