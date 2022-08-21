@@ -5,6 +5,7 @@ import {
   FindAllPostsOutput,
 } from './dto/find-all-posts.dto';
 import { FindPostInput, FindPostOutput } from './dto/find-post.dto';
+import { UpdatePostOutput, UpdatePostInput } from './dto/update-post.dto';
 import { Post } from './entity/post.entity';
 import { PostService } from './posts.service';
 
@@ -29,6 +30,13 @@ export class PostResolver {
     @Args(`input`) FindPostInput: FindPostInput,
   ): Promise<FindPostOutput> {
     return await this.postService.findPost(FindPostInput);
+  }
+  @Mutation(() => UpdatePostOutput)
+  async updatePost(
+    @Args('input') UpdatePostInput: UpdatePostInput,
+    @Args('PostId') PostId: number,
+  ): Promise<UpdatePostOutput> {
+    return await this.postService.updatePost(UpdatePostInput, PostId);
   }
 
   // @Query()

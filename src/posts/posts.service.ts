@@ -7,6 +7,7 @@ import {
   FindAllPostsOutput,
 } from './dto/find-all-posts.dto';
 import { FindPostInput, FindPostOutput } from './dto/find-post.dto';
+import { UpdatePostInput, UpdatePostOutput } from './dto/update-post.dto';
 import { Post } from './entity/post.entity';
 
 @Injectable()
@@ -90,6 +91,58 @@ export class PostService {
       };
     }
   }
-  // async updatePost() {}
+  async updatePost(
+    UpdatePostInput: UpdatePostInput,
+    PostId: number,
+  ): Promise<UpdatePostOutput> {
+    try {
+      const post = await this.posts.findOne({
+        where: {
+          id: PostId,
+        },
+      });
+      //게시물이 존재하지 않음
+      if (!post) {
+        return {
+          ok: false,
+          error: 'could not find post',
+        };
+      }
+
+      //익명 게시물임
+      if (post.owenrId === null) {
+        return {
+          ok: false,
+          error: 'no owner post can not edit',
+        };
+      }
+
+      //게시물은 있으나 owner가 아님
+      if (post.owenrId && post.owenrId !== UpdatePostInput.owenrId) {
+        return {
+          ok: false,
+          error: 'you are not owner can not edit',
+        };
+      }
+
+      //게시물도 있고 주인임
+      if (post.owenrId && post.owenrId === UpdatePostInput.owenrId) {
+        await this.posts.update(
+          { id: PostId },
+          {
+            ...UpdatePostInput,
+          },
+        );
+        return {
+          ok: true,
+        };
+      }
+    } catch (e) {
+      return {
+        ok: false,
+        error: e,
+      };
+    }
+  }
   // async deletePost() {}
 }
