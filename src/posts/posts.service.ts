@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePostInput, CreatePostOutut } from './dto/create-post.dto';
+import {
+  FindAllPostsInput,
+  FindAllPostsOutput,
+} from './dto/find-all-posts.dto';
 import { FindPostInput, FindPostOutput } from './dto/find-post.dto';
 import { Post } from './entity/post.entity';
 
@@ -67,6 +71,25 @@ export class PostService {
       return { ok: false, error: 'sorry we could not find post' };
     }
   }
+  async findAllPosts({ page }: FindAllPostsInput): Promise<FindAllPostsOutput> {
+    try {
+      const [posts, totalResults] = await this.posts.findAndCount({
+        skip: (page - 1) * 5,
+        take: 5,
+      });
+      return {
+        ok: true,
+        results: posts,
+        totalPages: Math.ceil(totalResults / 5),
+        totalResults,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: 'could not load posts',
+      };
+    }
+  }
   // async updatePost() {}
-  // async deletePist() {}
+  // async deletePost() {}
 }
