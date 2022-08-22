@@ -25,7 +25,7 @@ export class Post extends Core {
   @Column({ default: null })
   @Field((type) => Number, { nullable: true })
   @IsInt()
-  owenrId?: number;
+  ownerId?: number;
 
   @OneToMany((type) => Comment, (comment) => comment.post, {
     eager: true,

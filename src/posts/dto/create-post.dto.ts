@@ -14,7 +14,7 @@ import { Post } from '../entity/post.entity';
 @InputType()
 export class CreatePostInput extends PickType(Post, [
   'content',
-  'owenrId',
+  'ownerId',
   'title',
 ]) {
   @Field((type) => String, { nullable: true })

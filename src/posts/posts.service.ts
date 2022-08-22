@@ -110,7 +110,7 @@ export class PostService {
       }
 
       //익명 게시물임
-      if (post.owenrId === null) {
+      if (post.ownerId === null) {
         return {
           ok: false,
           error: 'no owner post can not edit',
@@ -118,7 +118,7 @@ export class PostService {
       }
 
       //게시물은 있으나 owner가 아님
-      if (post.owenrId && post.owenrId !== UpdatePostInput.owenrId) {
+      if (post.ownerId && post.ownerId !== UpdatePostInput.owenrId) {
         return {
           ok: false,
           error: 'you are not owner can not edit',
@@ -126,7 +126,7 @@ export class PostService {
       }
 
       //게시물도 있고 주인임
-      if (post.owenrId && post.owenrId === UpdatePostInput.owenrId) {
+      if (post.ownerId && post.ownerId === UpdatePostInput.owenrId) {
         await this.posts.update(
           { id: PostId },
           {
