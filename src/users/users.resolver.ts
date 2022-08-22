@@ -1,6 +1,10 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Role } from 'src/auth/role.decorator';
 import { CreateUserInput, CreateUserOutput } from './dtos/createUser.dto';
 import { findUserInput, findUserOutput } from './dtos/findUser.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
@@ -31,7 +35,8 @@ constructor(private readonly userService: UserService){}
   }
 
   @Query((returns) => User)
-  me(@Context() context) {
-    console.log("");
+  @Role(['Client'])
+  me(@AuthUser() authUser: User) {
+    return authUser;
   }
 }

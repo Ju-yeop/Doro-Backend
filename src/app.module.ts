@@ -12,6 +12,7 @@ import { Comment } from './comments/comment.entity';
 import { Post } from './posts/entity/post.entity';
 import { PostService } from './posts/posts.service';
 import { jwtMiddleware } from './jwt/jwt.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { jwtMiddleware } from './jwt/jwt.middleware';
     }),
     UsersModule,
     PostModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
