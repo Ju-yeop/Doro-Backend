@@ -6,6 +6,7 @@ import { AuthUser } from 'src/auth/auth-user.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Role } from 'src/auth/role.decorator';
 import { CreateUserInput, CreateUserOutput } from './dtos/createUser.dto';
+import { editUserInput, editUserOutput } from './dtos/editUser.dto';
 import { findUserInput, findUserOutput } from './dtos/findUser.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
@@ -28,6 +29,7 @@ constructor(private readonly userService: UserService){}
   }
   
   @Query((returns) => findUserOutput)
+  @Role(['Any'])
   async findUser(
     @Args() findUserInput: findUserInput,
   ): Promise<findUserOutput> {
@@ -35,8 +37,17 @@ constructor(private readonly userService: UserService){}
   }
 
   @Query((returns) => User)
-  @Role(['Client'])
+  @Role(['Any'])
   me(@AuthUser() authUser: User) {
     return authUser;
+  }
+
+  @Mutation((returns) => editUserOutput)
+  @Role(['Any'])
+  async editUser(
+    @AuthUser() authUser: User,
+    @Args('input') userEditInput: editUserInput,
+  ): Promise<editUserOutput> {
+    return this.userService.editUser(authUser.id, userEditInput);
   }
 }
