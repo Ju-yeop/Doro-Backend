@@ -13,5 +13,5 @@ constructor(private readonly userService: UserService){}
   async createUser(
     @Args('input') createUserInput: CreateUserInput): Promise<CreateUserOutput> {
     return this.userService.createUser(createUserInput);
-    }
+  }
 }
