@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { ApolloDriver } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
