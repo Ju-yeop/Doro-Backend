@@ -1,6 +1,6 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { IsInt, IsString } from 'class-validator';
-import { Comment } from 'src/comments/comment.entity';
+import { Comment } from 'src/posts/entity/comment.entity';
 import { Core } from 'src/common/entity/core.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 @InputType('CreatePostInput', { isAbstract: true })

@@ -1,6 +1,11 @@
 /* eslint-disable prettier/prettier */
 import { ApolloDriver } from '@nestjs/apollo';
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,7 +13,7 @@ import { UsersModule } from './users/users.module';
 import * as Joi from 'joi';
 import { User } from './users/entities/user.entity';
 import { PostModule } from './posts/posts.module';
-import { Comment } from './comments/comment.entity';
+import { Comment } from './posts/entity/comment.entity';
 import { Post } from './posts/entity/post.entity';
 import { PostService } from './posts/posts.service';
 import { jwtMiddleware } from './jwt/jwt.middleware';
@@ -55,7 +60,7 @@ import { AuthModule } from './auth/auth.module';
   controllers: [],
   providers: [],
 })
-export class AppModule implements NestModule{
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(jwtMiddleware).forRoutes({
       path: '/graphql',
