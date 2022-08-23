@@ -8,6 +8,7 @@ import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { findUserOutput } from './dtos/findUser.dto';
 import { editUserInput, editUserOutput } from './dtos/editUser.dto';
+import { deleteUserInput, deleteUserOutput } from './dtos/deleteUser.dto';
 
 @Injectable()
 export class UserService {
@@ -48,6 +49,7 @@ export class UserService {
         return { ok: false, error: 'Wrong Password' };
       }
       const token = jwt.sign({ id: user.id }, this.config.get('PRIVATE_KEY'));
+      console.log(token);
       return {
         ok: true,
         token,
@@ -97,6 +99,40 @@ export class UserService {
       };
     } catch (error) {
       return { ok: false, error: 'Could not update profile.' };
+    }
+  }
+  async deleteUser(
+    user: User,
+    deleteUserInput: deleteUserInput,
+  ): Promise<deleteUserOutput> {
+    try {
+      const targetUser = await this.users.find({
+        where: {
+          id: deleteUserInput.UserId,
+        },
+      });
+      if (!targetUser) {
+        return {
+          ok: false,
+          error: 'no user',
+        };
+      }
+      if (user.id === deleteUserInput.UserId) {
+        await this.users.delete(deleteUserInput.UserId);
+        return {
+          ok: true,
+        };
+      } else {
+        return {
+          ok: false,
+          error: 'can not delete',
+        };
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
     }
   }
 }
