@@ -1,5 +1,18 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  CreateCommentInput,
+  CreateCommentOutput,
+} from './dto/create-comment.dto';
 import { CreatePostInput, CreatePostOutut } from './dto/create-post.dto';
+import {
+  DeleteCommentInput,
+  DeleteCommentOutput,
+} from './dto/delete-comment.dto';
+import { DeletePostInput, DeletePostOutput } from './dto/delete-user.dto';
+import {
+  FindAllCommentsInput,
+  FindAllCommentsOutput,
+} from './dto/find-all-comments.dto';
 import {
   FindAllPostsInput,
   FindAllPostsOutput,
@@ -39,6 +52,31 @@ export class PostResolver {
     return await this.postService.updatePost(UpdatePostInput, PostId);
   }
 
-  // @Query()
-  // async findAllPost() {}
+  @Mutation(() => DeletePostOutput)
+  async deletePost(
+    @Args('input') DeletePostInput: DeletePostInput,
+  ): Promise<DeletePostOutput> {
+    return await this.postService.deletePost(DeletePostInput);
+  }
+
+  @Mutation(() => CreateCommentOutput)
+  async createComment(
+    @Args('input') CreateCommentInput: CreateCommentInput,
+  ): Promise<CreateCommentOutput> {
+    return await this.postService.createComment(CreateCommentInput);
+  }
+
+  @Query(() => FindAllCommentsOutput)
+  async findAllComments(
+    @Args('input') FindAllCommentsInput: FindAllCommentsInput,
+  ): Promise<FindAllCommentsOutput> {
+    return await this.postService.findAllComments(FindAllCommentsInput);
+  }
+
+  @Mutation(() => DeleteCommentOutput)
+  async deleteComment(
+    @Args('input') DeleteCommentInput: DeleteCommentInput,
+  ): Promise<DeleteCommentOutput> {
+    return await this.postService.deleteComment(DeleteCommentInput);
+  }
 }

@@ -1,13 +1,28 @@
 import { Injectable } from '@nestjs/common';
+import { Args } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import {
+  CreateCommentInput,
+  CreateCommentOutput,
+} from './dto/create-comment.dto';
 import { CreatePostInput, CreatePostOutut } from './dto/create-post.dto';
+import {
+  DeleteCommentInput,
+  DeleteCommentOutput,
+} from './dto/delete-comment.dto';
+import { DeletePostInput, DeletePostOutput } from './dto/delete-user.dto';
+import {
+  FindAllCommentsInput,
+  FindAllCommentsOutput,
+} from './dto/find-all-comments.dto';
 import {
   FindAllPostsInput,
   FindAllPostsOutput,
 } from './dto/find-all-posts.dto';
 import { FindPostInput, FindPostOutput } from './dto/find-post.dto';
 import { UpdatePostInput, UpdatePostOutput } from './dto/update-post.dto';
+import { Comment } from './entity/comment.entity';
 import { Post } from './entity/post.entity';
 
 @Injectable()
@@ -15,6 +30,9 @@ export class PostService {
   constructor(
     @InjectRepository(Post)
     private posts: Repository<Post>, // @InjectRepository(Comment) // private Comment: Repository<Post>,
+
+    @InjectRepository(Comment)
+    private comment: Repository<Comment>,
   ) {}
   async createPost(CreatePostInput: CreatePostInput): Promise<CreatePostOutut> {
     try {
@@ -113,7 +131,7 @@ export class PostService {
       if (post.ownerId === null) {
         return {
           ok: false,
-          error: 'no owner post can not edit',
+          error: 'no owner post, can not edit',
         };
       }
 
@@ -121,7 +139,7 @@ export class PostService {
       if (post.ownerId && post.ownerId !== UpdatePostInput.owenrId) {
         return {
           ok: false,
-          error: 'you are not owner can not edit',
+          error: 'you are not owner, can not edit',
         };
       }
 
@@ -144,5 +162,107 @@ export class PostService {
       };
     }
   }
-  // async deletePost() {}
+  async deletePost(
+    DeletePostInput: DeletePostInput,
+  ): Promise<DeletePostOutput> {
+    try {
+      const post = await this.posts.findOne({
+        where: {
+          id: DeletePostInput.postId,
+        },
+      });
+      //게시물이 존재하지 않음
+      if (!post) {
+        return {
+          ok: false,
+          error: 'post does not exist try again',
+        };
+      }
+      //post주인이 아님
+      if (post.ownerId !== DeletePostInput.userId) {
+        return {
+          ok: false,
+          error: 'you are not owenr cannot delete',
+        };
+      }
+      await this.posts.delete(DeletePostInput.postId);
+      return {
+        ok: true,
+      };
+    } catch (e) {
+      return {
+        ok: false,
+        error: e,
+      };
+    }
+  }
+  async createComment(
+    CreateCommentInput: CreateCommentInput,
+  ): Promise<CreateCommentOutput> {
+    try {
+      const post = await this.posts.findOne({
+        where: { id: CreateCommentInput.postId },
+      });
+      if (!post) {
+        return { ok: false, error: 'there is no post ' };
+      }
+      const newComment = this.comment.create({ ...CreateCommentInput, post });
+      await this.comment.save(newComment);
+      return {
+        ok: true,
+      };
+    } catch (e) {
+      return {
+        ok: false,
+        error: e,
+      };
+    }
+  }
+  async findAllComments(
+    FindAllCommentsInput: FindAllCommentsInput,
+  ): Promise<FindAllCommentsOutput> {
+    try {
+      const comments = await this.comment.find({
+        where: {
+          post: { id: FindAllCommentsInput.postId },
+        },
+      });
+
+      return {
+        ok: true,
+        comments,
+      };
+    } catch (e) {
+      return {
+        ok: false,
+        error: e,
+      };
+    }
+  }
+  async deleteComment(
+    DeleteCommentInput: DeleteCommentInput,
+  ): Promise<DeleteCommentOutput> {
+    try {
+      const comment = await this.comment.find({
+        where: {
+          id: DeleteCommentInput.commentId,
+        },
+      });
+      if (!comment) {
+        return {
+          ok: false,
+          error: 'there is no comment',
+        };
+      }
+      await this.comment.delete(DeleteCommentInput.commentId);
+      return {
+        ok: true,
+      };
+    } catch (e) {
+      return {
+        ok: true,
+        error: e,
+      };
+    }
+  }
 }
