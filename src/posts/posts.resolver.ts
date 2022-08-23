@@ -1,5 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreatePostInput, CreatePostOutut } from './dto/create-post.dto';
+import { DeletePostInput, DeletePostOutput } from './dto/delete-user.dto';
 import {
   FindAllPostsInput,
   FindAllPostsOutput,
@@ -39,6 +40,10 @@ export class PostResolver {
     return await this.postService.updatePost(UpdatePostInput, PostId);
   }
 
-  // @Query()
-  // async findAllPost() {}
+  @Mutation(() => DeletePostOutput)
+  async deletePost(
+    @Args('input') DeletePostInput: DeletePostInput,
+  ): Promise<DeletePostOutput> {
+    return await this.postService.deletePost(DeletePostInput);
+  }
 }

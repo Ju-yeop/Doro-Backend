@@ -1,14 +1,5 @@
-import {
-  Field,
-  InputType,
-  Int,
-  ObjectType,
-  OmitType,
-  PickType,
-} from '@nestjs/graphql';
-import { IsInt, IsString } from 'class-validator';
+import { Field, InputType, ObjectType, PickType } from '@nestjs/graphql';
 import { CoreOutput } from 'src/common/dto/output.dto';
-import { Column } from 'typeorm';
 import { Post } from '../entity/post.entity';
 
 @InputType()

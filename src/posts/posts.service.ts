@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePostInput, CreatePostOutut } from './dto/create-post.dto';
+import { DeletePostInput, DeletePostOutput } from './dto/delete-user.dto';
 import {
   FindAllPostsInput,
   FindAllPostsOutput,
@@ -113,7 +114,7 @@ export class PostService {
       if (post.ownerId === null) {
         return {
           ok: false,
-          error: 'no owner post can not edit',
+          error: 'no owner post, can not edit',
         };
       }
 
@@ -121,7 +122,7 @@ export class PostService {
       if (post.ownerId && post.ownerId !== UpdatePostInput.owenrId) {
         return {
           ok: false,
-          error: 'you are not owner can not edit',
+          error: 'you are not owner, can not edit',
         };
       }
 
@@ -144,5 +145,38 @@ export class PostService {
       };
     }
   }
-  // async deletePost() {}
+  async deletePost(
+    DeletePostInput: DeletePostInput,
+  ): Promise<DeletePostOutput> {
+    try {
+      const post = await this.posts.findOne({
+        where: {
+          id: DeletePostInput.postId,
+        },
+      });
+      //게시물이 존재하지 않음
+      if (!post) {
+        return {
+          ok: false,
+          error: 'post does not exist try again',
+        };
+      }
+      //post주인이 아님
+      if (post.ownerId !== DeletePostInput.userId) {
+        return {
+          ok: false,
+          error: 'you are not owenr cannot delete',
+        };
+      }
+      await this.posts.delete(DeletePostInput.postId);
+      return {
+        ok: true,
+      };
+    } catch (e) {
+      return {
+        ok: false,
+        error: e,
+      };
+    }
+  }
 }
