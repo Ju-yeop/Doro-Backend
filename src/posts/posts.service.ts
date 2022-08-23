@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Args } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import {
   CreateCommentInput,
@@ -11,7 +12,7 @@ import {
   DeleteCommentInput,
   DeleteCommentOutput,
 } from './dto/delete-comment.dto';
-import { DeletePostInput, DeletePostOutput } from './dto/delete-user.dto';
+import { DeletePostInput, DeletePostOutput } from './dto/delete-post.dto';
 import {
   FindAllCommentsInput,
   FindAllCommentsOutput,
@@ -34,9 +35,15 @@ export class PostService {
     @InjectRepository(Comment)
     private comment: Repository<Comment>,
   ) {}
-  async createPost(CreatePostInput: CreatePostInput): Promise<CreatePostOutut> {
+  async createPost(
+    user: User,
+    CreatePostInput: CreatePostInput,
+  ): Promise<CreatePostOutut> {
     try {
-      const newPost = this.posts.create(CreatePostInput);
+      const newPost = this.posts.create({
+        ownerId: user.id,
+        ...CreatePostInput,
+      });
       await this.posts.save(newPost);
       return {
         ok: true,
@@ -110,13 +117,13 @@ export class PostService {
     }
   }
   async updatePost(
+    user: User,
     UpdatePostInput: UpdatePostInput,
-    PostId: number,
   ): Promise<UpdatePostOutput> {
     try {
       const post = await this.posts.findOne({
         where: {
-          id: PostId,
+          id: UpdatePostInput.id,
         },
       });
       //게시물이 존재하지 않음
@@ -136,7 +143,7 @@ export class PostService {
       }
 
       //게시물은 있으나 owner가 아님
-      if (post.ownerId && post.ownerId !== UpdatePostInput.owenrId) {
+      if (post.ownerId && post.ownerId !== user.id) {
         return {
           ok: false,
           error: 'you are not owner, can not edit',
@@ -144,12 +151,10 @@ export class PostService {
       }
 
       //게시물도 있고 주인임
-      if (post.ownerId && post.ownerId === UpdatePostInput.owenrId) {
+      if (post.ownerId && post.ownerId === user.id) {
         await this.posts.update(
-          { id: PostId },
-          {
-            ...UpdatePostInput,
-          },
+          { id: UpdatePostInput.id },
+          { ownerId: user.id, ...UpdatePostInput },
         );
         return {
           ok: true,
@@ -163,6 +168,7 @@ export class PostService {
     }
   }
   async deletePost(
+    user: User,
     DeletePostInput: DeletePostInput,
   ): Promise<DeletePostOutput> {
     try {
@@ -179,7 +185,7 @@ export class PostService {
         };
       }
       //post주인이 아님
-      if (post.ownerId !== DeletePostInput.userId) {
+      if (post.ownerId !== user.id) {
         return {
           ok: false,
           error: 'you are not owenr cannot delete',
@@ -197,6 +203,7 @@ export class PostService {
     }
   }
   async createComment(
+    user: User,
     CreateCommentInput: CreateCommentInput,
   ): Promise<CreateCommentOutput> {
     try {
@@ -206,7 +213,11 @@ export class PostService {
       if (!post) {
         return { ok: false, error: 'there is no post ' };
       }
-      const newComment = this.comment.create({ ...CreateCommentInput, post });
+      const newComment = this.comment.create({
+        owner: user,
+        ...CreateCommentInput,
+        post,
+      });
       await this.comment.save(newComment);
       return {
         ok: true,
@@ -240,18 +251,32 @@ export class PostService {
     }
   }
   async deleteComment(
+    user: User,
     DeleteCommentInput: DeleteCommentInput,
   ): Promise<DeleteCommentOutput> {
     try {
-      const comment = await this.comment.find({
+      const targetComment = await this.comment.findOne({
         where: {
           id: DeleteCommentInput.commentId,
         },
       });
-      if (!comment) {
+      if (!targetComment) {
         return {
           ok: false,
           error: 'there is no comment',
+        };
+      }
+      console.log(targetComment);
+      if (!targetComment.owner) {
+        return {
+          ok: false,
+          error: 'there is no owner',
+        };
+      }
+      if (targetComment.owner.id !== user.id) {
+        return {
+          ok: false,
+          error: 'you are not owner',
         };
       }
       await this.comment.delete(DeleteCommentInput.commentId);

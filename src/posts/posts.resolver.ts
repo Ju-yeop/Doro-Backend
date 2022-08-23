@@ -1,4 +1,7 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { Role } from 'src/auth/role.decorator';
+import { User } from 'src/users/entities/user.entity';
 import {
   CreateCommentInput,
   CreateCommentOutput,
@@ -8,7 +11,7 @@ import {
   DeleteCommentInput,
   DeleteCommentOutput,
 } from './dto/delete-comment.dto';
-import { DeletePostInput, DeletePostOutput } from './dto/delete-user.dto';
+import { DeletePostInput, DeletePostOutput } from './dto/delete-post.dto';
 import {
   FindAllCommentsInput,
   FindAllCommentsOutput,
@@ -26,12 +29,15 @@ import { PostService } from './posts.service';
 export class PostResolver {
   constructor(private readonly postService: PostService) {}
   @Mutation(() => CreatePostOutut)
+  @Role(['Any'])
   async createPost(
+    @AuthUser() authUser: User,
     @Args('input') CreatePostInput: CreatePostInput,
   ): Promise<CreatePostOutut> {
-    return await this.postService.createPost(CreatePostInput);
+    return await this.postService.createPost(authUser, CreatePostInput);
   }
   @Query(() => FindAllPostsOutput)
+  @Role(['Any'])
   async findAllPosts(
     @Args('input') FindAllPostsInput: FindAllPostsInput,
   ): Promise<FindAllPostsOutput> {
@@ -39,31 +45,36 @@ export class PostResolver {
   }
 
   @Query(() => FindPostOutput)
+  @Role(['Any'])
   async findPost(
     @Args(`input`) FindPostInput: FindPostInput,
   ): Promise<FindPostOutput> {
     return await this.postService.findPost(FindPostInput);
   }
   @Mutation(() => UpdatePostOutput)
+  @Role(['Client'])
   async updatePost(
+    @AuthUser() authUser: User,
     @Args('input') UpdatePostInput: UpdatePostInput,
-    @Args('PostId') PostId: number,
   ): Promise<UpdatePostOutput> {
-    return await this.postService.updatePost(UpdatePostInput, PostId);
+    return await this.postService.updatePost(authUser, UpdatePostInput);
   }
 
   @Mutation(() => DeletePostOutput)
+  @Role(['Client'])
   async deletePost(
+    @AuthUser() authUser: User,
     @Args('input') DeletePostInput: DeletePostInput,
   ): Promise<DeletePostOutput> {
-    return await this.postService.deletePost(DeletePostInput);
+    return await this.postService.deletePost(authUser, DeletePostInput);
   }
 
   @Mutation(() => CreateCommentOutput)
   async createComment(
+    @AuthUser() authUser: User,
     @Args('input') CreateCommentInput: CreateCommentInput,
   ): Promise<CreateCommentOutput> {
-    return await this.postService.createComment(CreateCommentInput);
+    return await this.postService.createComment(authUser, CreateCommentInput);
   }
 
   @Query(() => FindAllCommentsOutput)
@@ -74,9 +85,11 @@ export class PostResolver {
   }
 
   @Mutation(() => DeleteCommentOutput)
+  @Role(['Client'])
   async deleteComment(
+    @AuthUser() authUser: User,
     @Args('input') DeleteCommentInput: DeleteCommentInput,
   ): Promise<DeleteCommentOutput> {
-    return await this.postService.deleteComment(DeleteCommentInput);
+    return await this.postService.deleteComment(authUser, DeleteCommentInput);
   }
 }
