@@ -6,9 +6,6 @@ import { CoreOutput } from 'src/common/dto/output.dto';
 export class DeletePostInput {
   @Field((type) => Number)
   postId: number;
-
-  @Field((type) => Number)
-  userId: number;
 }
 
 @ObjectType()
