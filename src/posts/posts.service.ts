@@ -188,7 +188,7 @@ export class PostService {
       if (post.ownerId !== user.id) {
         return {
           ok: false,
-          error: 'you are not owenr cannot delete',
+          error: 'you are not owner cannot delete',
         };
       }
       await this.posts.delete(DeletePostInput.postId);

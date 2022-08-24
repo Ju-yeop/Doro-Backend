@@ -29,7 +29,6 @@ import { PostService } from './posts.service';
 export class PostResolver {
   constructor(private readonly postService: PostService) {}
   @Mutation(() => CreatePostOutut)
-  @Role(['Any'])
   async createPost(
     @AuthUser() authUser: User,
     @Args('input') CreatePostInput: CreatePostInput,
@@ -37,7 +36,6 @@ export class PostResolver {
     return await this.postService.createPost(authUser, CreatePostInput);
   }
   @Query(() => FindAllPostsOutput)
-  @Role(['Any'])
   async findAllPosts(
     @Args('input') FindAllPostsInput: FindAllPostsInput,
   ): Promise<FindAllPostsOutput> {
@@ -45,7 +43,6 @@ export class PostResolver {
   }
 
   @Query(() => FindPostOutput)
-  @Role(['Any'])
   async findPost(
     @Args(`input`) FindPostInput: FindPostInput,
   ): Promise<FindPostOutput> {
