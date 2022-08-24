@@ -14,7 +14,7 @@ export class Comment extends Core {
   @IsString()
   content: string;
 
-  @ManyToOne((type) => Post, (post) => post.comments)
+  @ManyToOne((type) => Post, (post) => post.comments, { onDelete: 'CASCADE' })
   post: Post;
 
   @ManyToOne((type) => User, (user) => user.comments, { eager: true })

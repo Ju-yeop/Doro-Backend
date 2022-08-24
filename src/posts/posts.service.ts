@@ -55,8 +55,19 @@ export class PostService {
       };
     }
   }
-  async findPost(FindPostInput: FindPostInput): Promise<FindPostOutput> {
+  async findPost(
+    user: User,
+    FindPostInput: FindPostInput,
+  ): Promise<FindPostOutput> {
     try {
+      if (user.role && user.role === 'Manager') {
+        const post = await this.posts.findOne({
+          where: {
+            id: FindPostInput.postId,
+          },
+        });
+        return { ok: true, post };
+      }
       //password 입력이 없을때 즉 frontend에서 비밀글이 아니라고 판단했을때
       if (FindPostInput.password === null) {
         const post = await this.posts.findOne({
@@ -93,8 +104,8 @@ export class PostService {
           return { ok: false, error: 'password is wrong' };
         }
       }
-    } catch {
-      return { ok: false, error: 'sorry we could not find post' };
+    } catch (error) {
+      return { ok: false, error };
     }
   }
   async findAllPosts({ page }: FindAllPostsInput): Promise<FindAllPostsOutput> {
@@ -185,7 +196,7 @@ export class PostService {
         };
       }
       //post주인이 아님
-      if (post.ownerId !== user.id) {
+      if (post.ownerId !== user.id && user.role !== 'Manager') {
         return {
           ok: false,
           error: 'you are not owner cannot delete',
@@ -266,14 +277,13 @@ export class PostService {
           error: 'there is no comment',
         };
       }
-      console.log(targetComment);
       if (!targetComment.owner) {
         return {
           ok: false,
           error: 'there is no owner',
         };
       }
-      if (targetComment.owner.id !== user.id) {
+      if (targetComment.owner.id !== user.id && user.role !== 'Manager') {
         return {
           ok: false,
           error: 'you are not owner',

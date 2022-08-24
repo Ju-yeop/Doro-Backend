@@ -44,9 +44,10 @@ export class PostResolver {
 
   @Query(() => FindPostOutput)
   async findPost(
+    @AuthUser() authUser: User,
     @Args(`input`) FindPostInput: FindPostInput,
   ): Promise<FindPostOutput> {
-    return await this.postService.findPost(FindPostInput);
+    return await this.postService.findPost(authUser, FindPostInput);
   }
   @Mutation(() => UpdatePostOutput)
   @Role(['Client'])

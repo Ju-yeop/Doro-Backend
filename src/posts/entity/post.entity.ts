@@ -30,7 +30,6 @@ export class Post extends Core {
   @OneToMany((type) => Comment, (comment) => comment.post, {
     eager: true,
     nullable: true,
-    onDelete: 'CASCADE',
   })
   @Field((type) => [Comment])
   comments: Comment[];
