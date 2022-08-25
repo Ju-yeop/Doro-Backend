@@ -17,18 +17,17 @@ export class UserService {
     private readonly config: ConfigService,
   ) {}
 
-  async createUser({
-    email,
-    password,
-    name,
-    role,
-  }: CreateUserInput): Promise<CreateUserOutput> {
+  async createUser(
+    CreateUserInput: CreateUserInput,
+  ): Promise<CreateUserOutput> {
     try {
-      const exist = await this.users.findOne({ where: { email } });
+      const exist = await this.users.findOne({
+        where: { email: CreateUserInput.email },
+      });
       if (exist) {
         return { ok: false, error: 'There is a user with that email already' };
       }
-      await this.users.save(this.users.create({ email, password, name, role }));
+      await this.users.save(this.users.create({ ...CreateUserInput }));
       return { ok: true };
     } catch (error) {
       return { ok: false, error };

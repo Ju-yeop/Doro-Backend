@@ -48,11 +48,15 @@ export class User extends Core {
   @Column()
   @Field((type) => String)
   @IsString()
+  phoneNumber: string;
+
+  @Column()
+  @Field((type) => String)
+  @IsString()
   plcae: string;
 
   @Column({ nullable: true })
   @Field((type) => String, { nullable: true })
-  @IsString()
   rank?: string;
 
   @Column({ type: 'enum', enum: UserRole })
@@ -62,8 +66,6 @@ export class User extends Core {
 
   @Field((type) => [Post])
   posts: Post[];
-  // ownerId랑 OneToMany?
-  //아니면 Owner를 Post Entity에 만들고 Owner랑 OneToMany?
 
   @OneToMany((type) => Comment, (comment) => comment.owner)
   @Field((type) => [Comment])
