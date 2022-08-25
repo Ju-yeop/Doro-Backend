@@ -35,15 +35,30 @@ export class User extends Core {
   @IsString()
   password: string;
 
-  @Column({ type: 'enum', enum: UserRole })
-  @Field((type) => UserRole)
-  @IsEnum(UserRole)
-  role: UserRole;
-
   @Column()
   @Field((type) => String)
   @IsString()
   name: string;
+
+  @Column()
+  @Field((type) => String)
+  @IsString()
+  institution: string;
+
+  @Column()
+  @Field((type) => String)
+  @IsString()
+  plcae: string;
+
+  @Column({ nullable: true })
+  @Field((type) => String, { nullable: true })
+  @IsString()
+  rank?: string;
+
+  @Column({ type: 'enum', enum: UserRole })
+  @Field((type) => UserRole)
+  @IsEnum(UserRole)
+  role: UserRole;
 
   @Field((type) => [Post])
   posts: Post[];

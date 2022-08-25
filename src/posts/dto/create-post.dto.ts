@@ -3,10 +3,15 @@ import { CoreOutput } from 'src/common/dto/output.dto';
 import { Post } from '../entity/post.entity';
 
 @InputType()
-export class CreatePostInput extends PickType(Post, ['content', 'title']) {
-  @Field((type) => String, { nullable: true })
-  password?: string;
-}
+export class CreatePostInput extends PickType(Post, [
+  'content',
+  'title',
+  'ownerName',
+  'phoneNumber',
+  'password',
+  'email',
+  'institution',
+]) {}
 
 @ObjectType()
 export class CreatePostOutut extends CoreOutput {}

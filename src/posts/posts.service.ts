@@ -40,14 +40,24 @@ export class PostService {
     CreatePostInput: CreatePostInput,
   ): Promise<CreatePostOutut> {
     try {
-      const newPost = this.posts.create({
-        ownerId: user.id,
-        ...CreatePostInput,
-      });
-      await this.posts.save(newPost);
-      return {
-        ok: true,
-      };
+      if (user) {
+        const newPost = this.posts.create({
+          ownerId: user.id,
+          ...CreatePostInput,
+        });
+        await this.posts.save(newPost);
+        return {
+          ok: true,
+        };
+      } else {
+        const newPost = this.posts.create({
+          ...CreatePostInput,
+        });
+        await this.posts.save(newPost);
+        return {
+          ok: true,
+        };
+      }
     } catch (e) {
       return {
         ok: false,

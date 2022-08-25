@@ -22,6 +22,24 @@ export class Post extends Core {
   @IsString()
   password?: string;
 
+  @Column()
+  @Field((type) => String)
+  @IsString()
+  ownerName: string;
+
+  @Column({ nullable: true })
+  @Field((type) => String, { nullable: true })
+  institution?: string;
+
+  @Column()
+  @Field((type) => String)
+  @IsString()
+  phoneNumber: string;
+
+  @Column({ nullable: true })
+  @Field((type) => String, { nullable: true })
+  email?: string;
+
   @Column({ default: null })
   @Field((type) => Number, { nullable: true })
   @IsInt()
