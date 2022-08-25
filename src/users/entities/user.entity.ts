@@ -53,7 +53,7 @@ export class User extends Core {
   @Column()
   @Field((type) => String)
   @IsString()
-  plcae: string;
+  place: string;
 
   @Column({ nullable: true })
   @Field((type) => String, { nullable: true })

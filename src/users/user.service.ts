@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { findUserOutput } from './dtos/findUser.dto';
 import { editUserInput, editUserOutput } from './dtos/editUser.dto';
 import { deleteUserInput, deleteUserOutput } from './dtos/deleteUser.dto';
-
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UserService {
   constructor(
@@ -72,27 +72,24 @@ export class UserService {
 
   async editUser(
     userId: number,
-    { email, password, name }: editUserInput,
+    editUserInput: editUserInput,
   ): Promise<editUserOutput> {
     try {
       const user = await this.users.findOne({ where: { id: userId } });
-      if (email) {
-        const exist = await this.users.findOne({ where: { email } });
+      if (editUserInput.email) {
+        const exist = await this.users.findOne({
+          where: { email: editUserInput.email },
+        });
         if (exist) {
           return {
             ok: false,
             error: 'There is a user with that email already',
           };
         }
-        user.email = email;
       }
-      if (password) {
-        user.password = password;
-      }
-      if (name) {
-        user.name = name;
-      }
-      await this.users.save(user);
+      console.log(editUserInput);
+      editUserInput.password = await bcrypt.hash(editUserInput.password, 10);
+      await this.users.update({ id: userId }, { ...editUserInput });
       return {
         ok: true,
       };
