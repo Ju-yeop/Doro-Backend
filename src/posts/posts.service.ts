@@ -4,6 +4,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import {
+  CheckPasswordInput,
+  CheckPasswordOutput,
+} from './dto/check-password.dto';
+import {
   CreateCommentInput,
   CreateCommentOutput,
 } from './dto/create-comment.dto';
@@ -40,6 +44,7 @@ export class PostService {
     CreatePostInput: CreatePostInput,
   ): Promise<CreatePostOutut> {
     try {
+      //로그인 회원
       if (user) {
         const newPost = this.posts.create({
           ownerId: user.id,
@@ -49,7 +54,9 @@ export class PostService {
         return {
           ok: true,
         };
-      } else {
+      }
+      //비로그인 회원
+      else {
         const newPost = this.posts.create({
           ...CreatePostInput,
         });
@@ -65,55 +72,53 @@ export class PostService {
       };
     }
   }
+
+  async checkPassword(
+    user: User,
+    CheckPasswordInput: CheckPasswordInput,
+  ): Promise<CheckPasswordOutput> {
+    try {
+      if (user && user.role === 'Manager') {
+        return { isSame: true };
+      }
+      const post = await this.posts.findOne({
+        where: {
+          id: CheckPasswordInput.postId,
+        },
+      });
+      if (post.password === CheckPasswordInput.password) {
+        return { isSame: true };
+      } else {
+        return { isSame: false };
+      }
+    } catch {
+      return {
+        isSame: false,
+      };
+    }
+  }
+
   async findPost(
     user: User,
     FindPostInput: FindPostInput,
   ): Promise<FindPostOutput> {
     try {
-      if (user.role && user.role === 'Manager') {
-        const post = await this.posts.findOne({
-          where: {
-            id: FindPostInput.postId,
-          },
-        });
-        return { ok: true, post };
+      const post = await this.posts.findOne({
+        where: {
+          id: FindPostInput.postId,
+        },
+      });
+      //게시물이 존재하지 않음
+      if (!post) {
+        return {
+          ok: false,
+          error: 'there is no post',
+        };
       }
-      //password 입력이 없을때 즉 frontend에서 비밀글이 아니라고 판단했을때
-      if (FindPostInput.password === null) {
-        const post = await this.posts.findOne({
-          where: {
-            id: FindPostInput.postId,
-          },
-        }); //혹시 모르니까 해당글이 비밀글이 맞는지 아닌지를 backend측에서 한번더 검사한다.
-        if (post.password === null) {
-          return { ok: true, post };
-        } else {
-          return {
-            ok: false,
-            error: 'this post id locked you should input password',
-          };
-        }
-      } else {
-        //password 가 있을 경우  frontend에서 비밀글이라 판단했을때
-        const post = await this.posts.findOne({
-          where: {
-            id: FindPostInput.postId,
-          },
-        });
-        //만약 front에서 오류 났을때 비밀글이 아닌 글이 비밀글 처럼 보이게 된다면
-        if (post.password === null) {
-          return {
-            ok: true,
-            post,
-          };
-        }
-        //입력받은 비밀번호 일치 여부에 따라 return
-        if (FindPostInput.password === post.password) {
-          return { ok: true, post };
-        } else {
-          return { ok: false, error: 'password is wrong' };
-        }
-      }
+      return {
+        ok: true,
+        post,
+      };
     } catch (error) {
       return { ok: false, error };
     }
@@ -147,6 +152,7 @@ export class PostService {
           id: UpdatePostInput.id,
         },
       });
+
       //게시물이 존재하지 않음
       if (!post) {
         return {
@@ -154,33 +160,13 @@ export class PostService {
           error: 'could not find post',
         };
       }
-
-      //익명 게시물임
-      if (post.ownerId === null) {
-        return {
-          ok: false,
-          error: 'no owner post, can not edit',
-        };
-      }
-
-      //게시물은 있으나 owner가 아님
-      if (post.ownerId && post.ownerId !== user.id) {
-        return {
-          ok: false,
-          error: 'you are not owner, can not edit',
-        };
-      }
-
-      //게시물도 있고 주인임
-      if (post.ownerId && post.ownerId === user.id) {
-        await this.posts.update(
-          { id: UpdatePostInput.id },
-          { ownerId: user.id, ...UpdatePostInput },
-        );
-        return {
-          ok: true,
-        };
-      }
+      await this.posts.update(
+        { id: UpdatePostInput.id },
+        { ...UpdatePostInput },
+      );
+      return {
+        ok: true,
+      };
     } catch (e) {
       return {
         ok: false,
@@ -205,17 +191,7 @@ export class PostService {
           error: 'post does not exist try again',
         };
       }
-      //post주인이 아님
-      if (post.ownerId !== user.id && user.role !== 'Manager') {
-        return {
-          ok: false,
-          error: 'you are not owner cannot delete',
-        };
-      }
-      await this.posts.delete(DeletePostInput.postId);
-      return {
-        ok: true,
-      };
+      await this.posts.delete({ id: post.id });
     } catch (e) {
       return {
         ok: false,
