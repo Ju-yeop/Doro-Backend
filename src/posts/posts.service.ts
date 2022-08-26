@@ -121,6 +121,9 @@ export class PostService {
   async findAllPosts({ page }: FindAllPostsInput): Promise<FindAllPostsOutput> {
     try {
       const [posts, totalResults] = await this.posts.findAndCount({
+        order: {
+          id: 'DESC',
+        },
         skip: (page - 1) * 5,
         take: 5,
       });

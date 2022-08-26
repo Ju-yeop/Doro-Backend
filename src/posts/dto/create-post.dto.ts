@@ -11,7 +11,6 @@ export class CreatePostInput extends PickType(Post, [
   'password',
   'email',
   'institution',
-  'createdAt'
 ]) {}
 
 @ObjectType()
