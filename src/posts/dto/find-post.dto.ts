@@ -6,9 +6,6 @@ import { Post } from '../entity/post.entity';
 export class FindPostInput {
   @Field((type) => Number)
   postId: number;
-
-  @Field((type) => String, { nullable: true, defaultValue: null })
-  password?: string;
 }
 
 @ObjectType()

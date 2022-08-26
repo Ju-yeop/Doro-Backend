@@ -3,6 +3,7 @@ import { IsInt, IsString } from 'class-validator';
 import { Comment } from 'src/posts/entity/comment.entity';
 import { Core } from 'src/common/entity/core.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
+
 @InputType('CreatePostInput', { isAbstract: true })
 @ObjectType()
 @Entity()
@@ -21,6 +22,10 @@ export class Post extends Core {
   @Field((type) => String, { nullable: true })
   @IsString()
   password?: string;
+
+  @Column()
+  @Field((type) => Boolean, { defaultValue: false })
+  isLocked: boolean;
 
   @Column()
   @Field((type) => String)
@@ -50,5 +55,5 @@ export class Post extends Core {
     nullable: true,
   })
   @Field((type) => [Comment])
-  comments: Comment[];
+  comments?: Comment[];
 }
