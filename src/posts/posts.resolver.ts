@@ -3,6 +3,10 @@ import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
 import { User } from 'src/users/entities/user.entity';
 import {
+  CheckPasswordInput,
+  CheckPasswordOutput,
+} from './dto/check-password.dto';
+import {
   CreateCommentInput,
   CreateCommentOutput,
 } from './dto/create-comment.dto';
@@ -42,6 +46,14 @@ export class PostResolver {
     return await this.postService.findAllPosts(FindAllPostsInput);
   }
 
+  @Query(() => CheckPasswordOutput)
+  async checkPassword(
+    @AuthUser() authUser: User,
+    @Args('input') CheckPasswordInput: CheckPasswordInput,
+  ): Promise<CheckPasswordOutput> {
+    return await this.postService.checkPassword(authUser, CheckPasswordInput);
+  }
+
   @Query(() => FindPostOutput)
   async findPost(
     @AuthUser() authUser: User,
@@ -50,7 +62,7 @@ export class PostResolver {
     return await this.postService.findPost(authUser, FindPostInput);
   }
   @Mutation(() => UpdatePostOutput)
-  @Role(['Client'])
+  // @Role(['Client']) login will be updated later
   async updatePost(
     @AuthUser() authUser: User,
     @Args('input') UpdatePostInput: UpdatePostInput,
@@ -59,7 +71,7 @@ export class PostResolver {
   }
 
   @Mutation(() => DeletePostOutput)
-  @Role(['Client'])
+  // @Role(['Client']) login will be updated later
   async deletePost(
     @AuthUser() authUser: User,
     @Args('input') DeletePostInput: DeletePostInput,
@@ -83,7 +95,7 @@ export class PostResolver {
   }
 
   @Mutation(() => DeleteCommentOutput)
-  @Role(['Client'])
+  // @Role(['Client']) login will be updated later
   async deleteComment(
     @AuthUser() authUser: User,
     @Args('input') DeleteCommentInput: DeleteCommentInput,
