@@ -108,6 +108,7 @@ export class PostService {
           id: FindPostInput.postId,
         },
       });
+      console.log(post);
       //게시물이 존재하지 않음
       if (!post) {
         return {
@@ -192,6 +193,9 @@ export class PostService {
         };
       }
       await this.posts.delete({ id: post.id });
+      return {
+        ok: true,
+      };
     } catch (e) {
       return {
         ok: false,
