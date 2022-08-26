@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Args } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
 import {
   CheckPasswordInput,
   CheckPasswordOutput,
@@ -128,21 +128,21 @@ export class PostService {
     try {
       const noticeCount = await this.posts.count({ where: { password: "doro2020" } });
       const [notices, noticeResults] = await this.posts.findAndCount({
-        where:{password: "doro2020"},
-        skip: (page - 1) * noticeCount,
-        take: noticeCount,
+        where:{password: "doro2020"}
       });
       const [posts, totalResults] = await this.posts.findAndCount({
+        where:{password:Not("doro2020")},
         skip: (page - 1) * (11-noticeCount),
         take: 11 - noticeCount,
       });
-      const Array = posts.filter((post) => post.password !== "doro2020");
+      const Array = [...posts];
       const newArray = notices.sort((post) => post.id).concat(Array.sort((post) => post.id));
+      const countResult = totalResults + noticeResults
       return {
         ok: true,
         results: newArray,
-        totalPages: Math.ceil(totalResults / 11),
-        totalResults,
+        totalPages: Math.ceil(totalResults / (11-noticeCount)),
+        totalResults : countResult,
       };
     } catch {
       return {
