@@ -15,6 +15,7 @@ export class CreatePostInput extends PickType(Post, [
   'ownerName',
   'phoneNumber',
   'isLocked',
+  'password',
 ]) {
   @Field((type) => String, { nullable: true })
   email?: string;
