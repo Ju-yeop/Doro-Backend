@@ -78,6 +78,7 @@ export class PostService {
     CheckPasswordInput: CheckPasswordInput,
   ): Promise<CheckPasswordOutput> {
     try {
+      console.log(user);
       if (user && user.role === 'Manager') {
         return { isSame: true };
       }
@@ -126,23 +127,27 @@ export class PostService {
   }
   async findAllPosts({ page }: FindAllPostsInput): Promise<FindAllPostsOutput> {
     try {
-      const noticeCount = await this.posts.count({ where: { password: "doro2020" } });
+      const noticeCount = await this.posts.count({
+        where: { password: 'doro2020' },
+      });
       const [notices, noticeResults] = await this.posts.findAndCount({
-        where:{password: "doro2020"}
+        where: { password: 'doro2020' },
       });
       const [posts, totalResults] = await this.posts.findAndCount({
-        where:{password:Not("doro2020")},
-        skip: (page - 1) * (11-noticeCount),
+        where: { password: Not('doro2020') },
+        skip: (page - 1) * (11 - noticeCount),
         take: 11 - noticeCount,
       });
       const Array = [...posts];
-      const newArray = notices.sort((post) => post.id).concat(Array.sort((post) => post.id));
-      const countResult = totalResults + noticeResults
+      const newArray = notices
+        .sort((post) => post.id)
+        .concat(Array.sort((post) => post.id));
+      const countResult = totalResults + noticeResults;
       return {
         ok: true,
         results: newArray,
-        totalPages: Math.ceil(totalResults / (11-noticeCount)),
-        totalResults : countResult,
+        totalPages: Math.ceil(totalResults / (11 - noticeCount)),
+        totalResults: countResult,
       };
     } catch {
       return {
