@@ -1,4 +1,5 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import { Post } from '../entity/post.entity';
 
 @InputType()
 export class CheckPasswordInput {
@@ -12,5 +13,8 @@ export class CheckPasswordInput {
 @ObjectType()
 export class CheckPasswordOutput {
   @Field((type) => Boolean)
-  isSame: Boolean;
+  isSame: boolean;
+
+  @Field((type) => Post, { nullable: true })
+  post?: Post;
 }

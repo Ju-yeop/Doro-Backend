@@ -78,17 +78,16 @@ export class PostService {
     CheckPasswordInput: CheckPasswordInput,
   ): Promise<CheckPasswordOutput> {
     try {
-      console.log(user);
-      if (user && user.role === 'Manager') {
-        return { isSame: true };
-      }
       const post = await this.posts.findOne({
         where: {
           id: CheckPasswordInput.postId,
         },
       });
+      if (user && user.role === 'Manager') {
+        return { isSame: true, post };
+      }
       if (post.password === CheckPasswordInput.password) {
-        return { isSame: true };
+        return { isSame: true, post };
       } else {
         return { isSame: false };
       }
@@ -131,18 +130,23 @@ export class PostService {
         where: { password: 'doro2020' },
       });
       const [notices, noticeResults] = await this.posts.findAndCount({
+        order: {
+          id: 'DESC',
+        },
         where: { password: 'doro2020' },
       });
       const [posts, totalResults] = await this.posts.findAndCount({
+        order: {
+          id: 'DESC',
+        },
         where: { password: Not('doro2020') },
         skip: (page - 1) * (11 - noticeCount),
         take: 11 - noticeCount,
       });
       const Array = [...posts];
-      const newArray = notices
-        .sort((post) => post.id)
-        .concat(Array.sort((post) => post.id));
+      const newArray = notices.concat(Array);
       const countResult = totalResults + noticeResults;
+
       return {
         ok: true,
         results: newArray,
