@@ -126,29 +126,32 @@ export class PostService {
   }
   async findAllPosts({ page }: FindAllPostsInput): Promise<FindAllPostsOutput> {
     try {
-      const noticeCount = await this.posts.count({ where: { password: "doro2020" } });
+      const noticeCount = await this.posts.count({
+        where: { password: 'doro2020' },
+      });
       const [notices, noticeResults] = await this.posts.findAndCount({
         order: {
-        id: "DESC",
-    },
-        where:{password: "doro2020"}
+          id: 'DESC',
+        },
+        where: { password: 'doro2020' },
       });
       const [posts, totalResults] = await this.posts.findAndCount({
         order: {
-        id: "DESC",
-    },
-        where:{password:Not("doro2020")},
-        skip: (page - 1) * (11-noticeCount),
+          id: 'DESC',
+        },
+        where: { password: Not('doro2020') },
+        skip: (page - 1) * (11 - noticeCount),
         take: 11 - noticeCount,
       });
       const Array = [...posts];
       const newArray = notices.concat(Array);
-      const countResult = totalResults + noticeResults
+      const countResult = totalResults + noticeResults;
+
       return {
         ok: true,
         results: newArray,
-        totalPages: Math.ceil(totalResults / (11-noticeCount)),
-        totalResults : countResult,
+        totalPages: Math.ceil(totalResults / (11 - noticeCount)),
+        totalResults: countResult,
       };
     } catch {
       return {
