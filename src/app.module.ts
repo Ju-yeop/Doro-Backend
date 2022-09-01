@@ -47,7 +47,7 @@ import { AuthModule } from './auth/auth.module';
             database: process.env.DB_NAME,
           })),
 
-      synchronize: true,
+      synchronize: false,
       logging: true,
       entities: [User, Post, Comment],
     }),
