@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserInput, CreateUserOutput } from './dtos/createUser.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
-import { User } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { findUserOutput } from './dtos/findUser.dto';
@@ -17,9 +17,10 @@ export class UserService {
     private readonly config: ConfigService,
   ) {}
 
-  async createUser(
-    CreateUserInput: CreateUserInput,
-  ): Promise<CreateUserOutput> {
+  async createUser({
+    role,
+    ...CreateUserInput
+  }: CreateUserInput): Promise<CreateUserOutput> {
     try {
       const exist = await this.users.findOne({
         where: { email: CreateUserInput.email },
@@ -27,7 +28,23 @@ export class UserService {
       if (exist) {
         return { ok: false, error: 'There is a user with that email already' };
       }
-      await this.users.save(this.users.create({ ...CreateUserInput }));
+
+      //매니저 권한 요청
+      if (
+        CreateUserInput.rank &&
+        CreateUserInput.rank === process.env.MANAGER_PASSWORD
+      ) {
+        const newUser = this.users.create({
+          role: UserRole.Manager,
+          ...CreateUserInput,
+        });
+        await this.users.save(newUser);
+        console.log('you are manager');
+        return { ok: true };
+      }
+      await this.users.save(
+        this.users.create({ role: UserRole.Client, ...CreateUserInput }),
+      );
       return { ok: true };
     } catch (error) {
       return { ok: false, error };
