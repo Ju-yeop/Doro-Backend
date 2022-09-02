@@ -54,7 +54,7 @@ import { AuthModule } from './auth/auth.module';
     GraphQLModule.forRoot({
       driver: ApolloDriver,
       debug: false,
-      playground: process.env.NODE_ENV !== 'production',
+      playground: process.env.NODE_ENV === 'production',
       autoSchemaFile: true,
       context: ({ req }) => ({ user: req['user'] }),
     }),
