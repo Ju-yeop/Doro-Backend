@@ -29,6 +29,7 @@ import { FindPostInput, FindPostOutput } from './dto/find-post.dto';
 import { UpdatePostInput, UpdatePostOutput } from './dto/update-post.dto';
 import { Comment } from './entity/comment.entity';
 import { Post } from './entity/post.entity';
+import { SolapiMessageService } from 'solapi';
 
 @Injectable()
 export class PostService {
@@ -108,7 +109,6 @@ export class PostService {
           id: FindPostInput.postId,
         },
       });
-      console.log(post);
       //게시물이 존재하지 않음
       if (!post) {
         return {
@@ -237,6 +237,28 @@ export class PostService {
         post,
       });
       await this.comment.save(newComment);
+      /*Solapi Test-------------------------------- */
+      const messageService = new SolapiMessageService(process.env.SOLAPIKEY, process.env.SOLAPISECRETKEY);
+
+      messageService.sendOne({
+        to: post.phoneNumber,
+        from: process.env.PHONE_NUMBER,
+        kakaoOptions: {
+          pfId: process.env.KAKAOPFID,
+          templateId: "KA01TP221013114110860VPIY2uRThDq",
+          disableSms: false,
+          adFlag: false,
+          variables: {
+            "#{성함}": post.ownerName,
+            "#{제목}": post.title,
+            "#{소속기관}": post.institution,
+            "#{작성일}": post.createdAt.toISOString().slice(0, 10),
+            "#{url}": "doroedu.net/posts"
+          }
+        },
+        autoTypeDetect: true
+      }).then(res => console.log(res));
+      /*-------------------------------- */
       return {
         ok: true,
       };
