@@ -39,14 +39,21 @@ import { AuthModule } from './auth/auth.module';
       type: 'postgres',
       ...(process.env.DATABASE_URL
         ? ({ url: process.env.DATABASE_URL })
-        : ({
+        : (process.env.NODE_ENV === 'dev' ? ({
+            host: process.env.DBL_HOST,
+            port: +process.env.DBL_PORT,
+            username: process.env.DBL_USERNAME,
+            password: process.env.DBL_PASSWORD,
+            database: process.env.DBL_NAME,
+        }) : ({
             host: process.env.DB_HOST,
             port: +process.env.DB_PORT,
             username: process.env.DB_USERNAME,
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME,
-          })),
-
+        })
+        )
+      ),
       synchronize: false,
       logging: true,
       entities: [User, Post, Comment],
