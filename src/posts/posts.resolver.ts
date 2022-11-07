@@ -16,6 +16,7 @@ import {
   DeleteCommentOutput,
 } from './dto/delete-comment.dto';
 import { DeletePostInput, DeletePostOutput } from './dto/delete-post.dto';
+import { EditCommentInput, EditCommentOutput } from './dto/edit-comment.dto';
 import {
   FindAllCommentsInput,
   FindAllCommentsOutput,
@@ -101,5 +102,14 @@ export class PostResolver {
     @Args('input') DeleteCommentInput: DeleteCommentInput,
   ): Promise<DeleteCommentOutput> {
     return await this.postService.deleteComment(authUser, DeleteCommentInput);
+  }
+  
+  @Mutation(() => EditCommentOutput)
+  @Role(['Manager'])
+  async editComment(
+    @AuthUser() authUser: User,
+    @Args('input') EditCommentInput: EditCommentInput,
+  ): Promise<EditCommentOutput> {
+    return await this.postService.editComment(authUser, EditCommentInput);
   }
 }

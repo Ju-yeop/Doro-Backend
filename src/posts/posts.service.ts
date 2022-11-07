@@ -29,11 +29,9 @@ import { UpdatePostInput, UpdatePostOutput } from './dto/update-post.dto';
 import { Comment } from './entity/comment.entity';
 import { Post } from './entity/post.entity';
 import { SolapiMessageService } from 'solapi';
+import * as bcrypt from 'bcrypt';
+import { EditCommentInput, EditCommentOutput } from './dto/edit-comment.dto';
 
-const messageService = new SolapiMessageService(
-  'NCS7CA6ZHEZB99ZZ',
-  'SDPQOTON4VNLZ4IGVETQWGJ9RFGWYF5M',
-);
 
 @Injectable()
 export class PostService {
@@ -44,15 +42,20 @@ export class PostService {
     @InjectRepository(Comment)
     private comment: Repository<Comment>,
   ) {}
+  
   async createPost(
     user: User,
     { password, ...CreatePostInput }: CreatePostInput,
   ): Promise<CreatePostOutut> {
     try {
       //로그인 회원
-      const bcrypt = require('bcrypt');
       const saltRounds = 10;
       const hash = bcrypt.hashSync(password, saltRounds);
+
+      const messageService = new SolapiMessageService(
+        process.env.SOLAPIKEY,
+        process.env.SOLAPISECRETKEY
+      );
 
       if (user) {
         const newPost = this.posts.create({
@@ -61,6 +64,31 @@ export class PostService {
           ...CreatePostInput,
         });
         await this.posts.save(newPost);
+
+        messageService
+        .sendOne({
+          to: '01066156280',
+          from: process.env.PHONE_NUMBER,
+          kakaoOptions: {
+            pfId: process.env.KAKAOPFID,
+            templateId: 'KA01TP221013112749783YFgBRxkPdcG',
+            disableSms: false,
+            adFlag: false,
+            variables: {
+              '#{성함}': newPost.ownerName,
+              '#{제목}': newPost.title,
+              '#{소속기관}': newPost.institution,
+              '#{작성일}': newPost.createdAt.toISOString().slice(0, 10),
+              '#{url}':
+                newPost.isLocked == false
+                  ? `doroedu.net/post/${newPost.id}`
+                  : `doroedu.net/post/${newPost.id}?hp=${newPost.password}`,
+            },
+          },
+          autoTypeDetect: true,
+        })
+        .then((res) => console.log(res));
+
         return {
           ok: true,
         };
@@ -71,8 +99,33 @@ export class PostService {
           password: hash,
           ...CreatePostInput,
         });
-        console.log(hash);
         await this.posts.save(newPost);
+
+        messageService
+        .sendOne({
+          to: '01066156280',
+          from: process.env.PHONE_NUMBER,
+          kakaoOptions: {
+            pfId: process.env.KAKAOPFID,
+            templateId: 'KA01TP221013112749783YFgBRxkPdcG',
+            disableSms: false,
+            adFlag: false,
+            variables: {
+              '#{성함}': newPost.ownerName,
+              '#{소속기관}': newPost.institution,
+              '#{연락처}': newPost.phoneNumber,
+              '#{글 제목}': newPost.title,
+              '#{글 내용}': newPost.content,
+              '#{url}':
+                newPost.isLocked == false
+                  ? `doroedu.net/post/${newPost.id}`
+                  : `doroedu.net/post/${newPost.id}?hp=${newPost.password}`,
+            },
+          },
+          autoTypeDetect: true,
+        })
+          .then((res) => console.log(res));
+        
         return {
           ok: true,
         };
@@ -98,7 +151,6 @@ export class PostService {
       if (user && user.role === 'Manager') {
         return { isSame: true, post };
       }
-      const bcrypt = require('bcrypt');
       if (bcrypt.compareSync(CheckPasswordInput.password, post.password)) {
         return { isSame: true, post };
       } else {
@@ -250,9 +302,10 @@ export class PostService {
       });
       await this.comment.save(newComment);
       /*Solapi Test-------------------------------- */
+
       const messageService = new SolapiMessageService(
         process.env.SOLAPIKEY,
-        process.env.SOLAPISECRETKEY,
+        process.env.SOLAPISECRETKEY
       );
 
       messageService
@@ -345,6 +398,43 @@ export class PostService {
     } catch (e) {
       return {
         ok: true,
+        error: e,
+      };
+    }
+  }
+
+  async editComment(
+    user: User,
+    EditCommentInput: EditCommentInput,
+  ): Promise<EditCommentOutput> {
+    try {
+      /* FrontEnd에서 CommentID를 받아올 수가 없어서 
+      프론트에서 postID를 받고 백엔드에서 postId를 통해 해당 Post의 
+      Comment들을 Find한 다음 그 중 가장 마지막 Comment의 Content를 수정한다.*/
+      const comments = await this.comment.find({
+        where: {
+          post:{id: EditCommentInput.postId}
+        }
+      })
+      if (!comments) {
+        return {
+          ok: false,
+          error: 'could not find post',
+        };
+      }
+      comments.sort(function(a, b){return a.id - b.id}) //정렬하지 않을 경우 UpdatedAt 기준 정렬
+      const commentId = comments[comments.length-1].id; //JS에서는 [-1] 사용 불가능
+      
+      await this.comment.update(
+        { id:commentId },
+        { content: EditCommentInput.content },
+      );
+      return {
+        ok: true,
+      };
+    } catch (e) {
+      return {
+        ok: false,
         error: e,
       };
     }
