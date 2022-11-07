@@ -1,5 +1,11 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
-import { IsInt, IsString } from 'class-validator';
+import {
+  IsInt,
+  IsString,
+  MaxLength,
+  maxLength,
+  minLength,
+} from 'class-validator';
 import { Comment } from 'src/posts/entity/comment.entity';
 import { Core } from 'src/common/entity/core.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
@@ -30,6 +36,7 @@ export class Post extends Core {
   @Column()
   @Field((type) => String)
   @IsString()
+  @MaxLength(4)
   ownerName: string;
 
   @Column({ nullable: true })

@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Args } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository, Not } from 'typeorm';
@@ -31,6 +30,11 @@ import { Comment } from './entity/comment.entity';
 import { Post } from './entity/post.entity';
 import { SolapiMessageService } from 'solapi';
 
+const messageService = new SolapiMessageService(
+  'NCS7CA6ZHEZB99ZZ',
+  'SDPQOTON4VNLZ4IGVETQWGJ9RFGWYF5M',
+);
+
 @Injectable()
 export class PostService {
   constructor(
@@ -42,25 +46,30 @@ export class PostService {
   ) {}
   async createPost(
     user: User,
-    CreatePostInput: CreatePostInput,
+    { password, ...CreatePostInput }: CreatePostInput,
   ): Promise<CreatePostOutut> {
     try {
       //로그인 회원
-      if (user) {
-        const newPost = this.posts.create({
-          ownerId: user.id,
-          ...CreatePostInput,
-        });
-        await this.posts.save(newPost);
-        return {
-          ok: true,
-        };
-      }
+      // if (user) {
+      //   const newPost = this.posts.create({
+      //     ownerId: user.id,
+      //     ...CreatePostInput,
+      //   });
+      //   await this.posts.save(newPost);
+      //   return {
+      //     ok: true,
+      //   };
+      // }
       //비로그인 회원
-      else {
+      {
+        const bcrypt = require('bcrypt');
+        const saltRounds = 10;
+        const hash = bcrypt.hashSync(password, saltRounds);
         const newPost = this.posts.create({
+          password: hash,
           ...CreatePostInput,
         });
+        console.log(hash);
         await this.posts.save(newPost);
         return {
           ok: true,
@@ -87,7 +96,8 @@ export class PostService {
       if (user && user.role === 'Manager') {
         return { isSame: true, post };
       }
-      if (post.password === CheckPasswordInput.password) {
+      const bcrypt = require('bcrypt');
+      if (bcrypt.compareSync(CheckPasswordInput.password, post.password)) {
         return { isSame: true, post };
       } else {
         return { isSame: false };
@@ -238,26 +248,34 @@ export class PostService {
       });
       await this.comment.save(newComment);
       /*Solapi Test-------------------------------- */
-      const messageService = new SolapiMessageService(process.env.SOLAPIKEY, process.env.SOLAPISECRETKEY);
+      const messageService = new SolapiMessageService(
+        process.env.SOLAPIKEY,
+        process.env.SOLAPISECRETKEY,
+      );
 
-      messageService.sendOne({
-        to: post.phoneNumber,
-        from: process.env.PHONE_NUMBER,
-        kakaoOptions: {
-          pfId: process.env.KAKAOPFID,
-          templateId: "KA01TP221013114110860VPIY2uRThDq",
-          disableSms: false,
-          adFlag: false,
-          variables: {
-            "#{성함}": post.ownerName,
-            "#{제목}": post.title,
-            "#{소속기관}": post.institution,
-            "#{작성일}": post.createdAt.toISOString().slice(0, 10),
-            "#{url}": "doroedu.net/posts"
-          }
-        },
-        autoTypeDetect: true
-      }).then(res => console.log(res));
+      messageService
+        .sendOne({
+          to: post.phoneNumber,
+          from: process.env.PHONE_NUMBER,
+          kakaoOptions: {
+            pfId: process.env.KAKAOPFID,
+            templateId: 'KA01TP221013114110860VPIY2uRThDq',
+            disableSms: false,
+            adFlag: false,
+            variables: {
+              '#{성함}': post.ownerName,
+              '#{제목}': post.title,
+              '#{소속기관}': post.institution,
+              '#{작성일}': post.createdAt.toISOString().slice(0, 10),
+              '#{url}':
+                post.isLocked == false
+                  ? `doroedu.net/post/${post.id}`
+                  : `doroedu.net/post/${post.id}?hp=${post.password}`,
+            },
+          },
+          autoTypeDetect: true,
+        })
+        .then((res) => console.log(res));
       /*-------------------------------- */
       return {
         ok: true,
