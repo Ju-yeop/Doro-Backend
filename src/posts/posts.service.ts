@@ -50,21 +50,23 @@ export class PostService {
   ): Promise<CreatePostOutut> {
     try {
       //로그인 회원
-      // if (user) {
-      //   const newPost = this.posts.create({
-      //     ownerId: user.id,
-      //     ...CreatePostInput,
-      //   });
-      //   await this.posts.save(newPost);
-      //   return {
-      //     ok: true,
-      //   };
-      // }
+      const bcrypt = require('bcrypt');
+      const saltRounds = 10;
+      const hash = bcrypt.hashSync(password, saltRounds);
+
+      if (user) {
+        const newPost = this.posts.create({
+          ownerId: user.id,
+          password: hash,
+          ...CreatePostInput,
+        });
+        await this.posts.save(newPost);
+        return {
+          ok: true,
+        };
+      }
       //비로그인 회원
       {
-        const bcrypt = require('bcrypt');
-        const saltRounds = 10;
-        const hash = bcrypt.hashSync(password, saltRounds);
         const newPost = this.posts.create({
           password: hash,
           ...CreatePostInput,
