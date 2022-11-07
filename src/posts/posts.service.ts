@@ -32,9 +32,9 @@ import { SolapiMessageService } from 'solapi';
 import * as bcrypt from 'bcrypt';
 
 const messageService = new SolapiMessageService(
-  'NCS7CA6ZHEZB99ZZ',
-  'SDPQOTON4VNLZ4IGVETQWGJ9RFGWYF5M',
-);
+        process.env.SOLAPIKEY,
+        process.env.SOLAPISECRETKEY,
+      );
 
 @Injectable()
 export class PostService {
@@ -45,6 +45,7 @@ export class PostService {
     @InjectRepository(Comment)
     private comment: Repository<Comment>,
   ) {}
+  
   async createPost(
     user: User,
     { password, ...CreatePostInput }: CreatePostInput,
@@ -61,6 +62,31 @@ export class PostService {
           ...CreatePostInput,
         });
         await this.posts.save(newPost);
+
+        messageService
+        .sendOne({
+          to: '01066156280',
+          from: process.env.PHONE_NUMBER,
+          kakaoOptions: {
+            pfId: process.env.KAKAOPFID,
+            templateId: 'KA01TP221013112749783YFgBRxkPdcG',
+            disableSms: false,
+            adFlag: false,
+            variables: {
+              '#{성함}': newPost.ownerName,
+              '#{제목}': newPost.title,
+              '#{소속기관}': newPost.institution,
+              '#{작성일}': newPost.createdAt.toISOString().slice(0, 10),
+              '#{url}':
+                newPost.isLocked == false
+                  ? `doroedu.net/post/${newPost.id}`
+                  : `doroedu.net/post/${newPost.id}?hp=${newPost.password}`,
+            },
+          },
+          autoTypeDetect: true,
+        })
+        .then((res) => console.log(res));
+
         return {
           ok: true,
         };
@@ -71,8 +97,33 @@ export class PostService {
           password: hash,
           ...CreatePostInput,
         });
-        console.log(hash);
         await this.posts.save(newPost);
+
+        messageService
+        .sendOne({
+          to: '01066156280',
+          from: process.env.PHONE_NUMBER,
+          kakaoOptions: {
+            pfId: process.env.KAKAOPFID,
+            templateId: 'KA01TP221013112749783YFgBRxkPdcG',
+            disableSms: false,
+            adFlag: false,
+            variables: {
+              '#{성함}': newPost.ownerName,
+              '#{소속기관}': newPost.institution,
+              '#{연락처}': newPost.phoneNumber,
+              '#{글 제목}': newPost.title,
+              '#{글 내용}': newPost.content,
+              '#{url}':
+                newPost.isLocked == false
+                  ? `doroedu.net/post/${newPost.id}`
+                  : `doroedu.net/post/${newPost.id}?hp=${newPost.password}`,
+            },
+          },
+          autoTypeDetect: true,
+        })
+          .then((res) => console.log(res));
+        
         return {
           ok: true,
         };
@@ -249,10 +300,6 @@ export class PostService {
       });
       await this.comment.save(newComment);
       /*Solapi Test-------------------------------- */
-      const messageService = new SolapiMessageService(
-        process.env.SOLAPIKEY,
-        process.env.SOLAPISECRETKEY,
-      );
 
       messageService
         .sendOne({
