@@ -29,6 +29,7 @@ import { UpdatePostInput, UpdatePostOutput } from './dto/update-post.dto';
 import { Comment } from './entity/comment.entity';
 import { Post } from './entity/post.entity';
 import { SolapiMessageService } from 'solapi';
+import * as bcrypt from 'bcrypt';
 
 const messageService = new SolapiMessageService(
   'NCS7CA6ZHEZB99ZZ',
@@ -50,7 +51,6 @@ export class PostService {
   ): Promise<CreatePostOutut> {
     try {
       //로그인 회원
-      const bcrypt = require('bcrypt');
       const saltRounds = 10;
       const hash = bcrypt.hashSync(password, saltRounds);
 
@@ -98,7 +98,6 @@ export class PostService {
       if (user && user.role === 'Manager') {
         return { isSame: true, post };
       }
-      const bcrypt = require('bcrypt');
       if (bcrypt.compareSync(CheckPasswordInput.password, post.password)) {
         return { isSame: true, post };
       } else {
