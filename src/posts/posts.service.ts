@@ -32,10 +32,6 @@ import { SolapiMessageService } from 'solapi';
 import * as bcrypt from 'bcrypt';
 import { EditCommentInput, EditCommentOutput } from './dto/edit-comment.dto';
 
-const messageService = new SolapiMessageService(
-        process.env.SOLAPIKEY,
-        process.env.SOLAPISECRETKEY,
-      );
 
 @Injectable()
 export class PostService {
@@ -55,6 +51,11 @@ export class PostService {
       //로그인 회원
       const saltRounds = 10;
       const hash = bcrypt.hashSync(password, saltRounds);
+
+      const messageService = new SolapiMessageService(
+        process.env.SOLAPIKEY,
+        process.env.SOLAPISECRETKEY
+      );
 
       if (user) {
         const newPost = this.posts.create({
@@ -301,6 +302,11 @@ export class PostService {
       });
       await this.comment.save(newComment);
       /*Solapi Test-------------------------------- */
+
+      const messageService = new SolapiMessageService(
+        process.env.SOLAPIKEY,
+        process.env.SOLAPISECRETKEY
+      );
 
       messageService
         .sendOne({
