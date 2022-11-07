@@ -30,6 +30,7 @@ import { Comment } from './entity/comment.entity';
 import { Post } from './entity/post.entity';
 import { SolapiMessageService } from 'solapi';
 import * as bcrypt from 'bcrypt';
+import { EditCommentInput, EditCommentOutput } from './dto/edit-comment.dto';
 
 const messageService = new SolapiMessageService(
         process.env.SOLAPIKEY,
@@ -391,6 +392,43 @@ export class PostService {
     } catch (e) {
       return {
         ok: true,
+        error: e,
+      };
+    }
+  }
+
+  async editComment(
+    user: User,
+    EditCommentInput: EditCommentInput,
+  ): Promise<EditCommentOutput> {
+    try {
+      /* FrontEnd에서 CommentID를 받아올 수가 없어서 
+      프론트에서 postID를 받고 백엔드에서 postId를 통해 해당 Post의 
+      Comment들을 Find한 다음 그 중 가장 마지막 Comment의 Content를 수정한다.*/
+      const comments = await this.comment.find({
+        where: {
+          post:{id: EditCommentInput.postId}
+        }
+      })
+      if (!comments) {
+        return {
+          ok: false,
+          error: 'could not find post',
+        };
+      }
+      comments.sort(function(a, b){return a.id - b.id}) //정렬하지 않을 경우 UpdatedAt 기준 정렬
+      const commentId = comments[comments.length-1].id; //JS에서는 [-1] 사용 불가능
+      
+      await this.comment.update(
+        { id:commentId },
+        { content: EditCommentInput.content },
+      );
+      return {
+        ok: true,
+      };
+    } catch (e) {
+      return {
+        ok: false,
         error: e,
       };
     }
