@@ -67,7 +67,7 @@ export class PostService {
 
         messageService
         .sendOne({
-          to: '01066156280',
+          to: '01076330371',
           from: process.env.PHONE_NUMBER,
           kakaoOptions: {
             pfId: process.env.KAKAOPFID,
@@ -103,7 +103,7 @@ export class PostService {
 
         messageService
         .sendOne({
-          to: '01066156280',
+          to: '01076330371',
           from: process.env.PHONE_NUMBER,
           kakaoOptions: {
             pfId: process.env.KAKAOPFID,
