@@ -1,4 +1,4 @@
-!<fix> git text message git ignore에 추가 
+<fix> git text message git ignore에 추가 
 ################
 git text nessage git ignore에 추가
 ################
