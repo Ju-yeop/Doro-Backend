@@ -18,6 +18,8 @@ import { Post } from './posts/entity/post.entity';
 import { PostService } from './posts/posts.service';
 import { jwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
+import { StructorsModule } from './structors/structors.module';
+import { Structor } from './structors/entity/structors.entity';
 
 @Module({
   imports: [
@@ -56,7 +58,7 @@ import { AuthModule } from './auth/auth.module';
       ),
       synchronize: false,
       logging: true,
-      entities: [User, Post, Comment],
+      entities: [User, Post, Comment, Structor],
     }),
     GraphQLModule.forRoot({
       driver: ApolloDriver,
@@ -68,6 +70,7 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     PostModule,
     AuthModule,
+    StructorsModule,
   ],
   controllers: [],
   providers: [],
