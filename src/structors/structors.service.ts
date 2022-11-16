@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AddStructorInput, AddStructorOutput } from './dtos/add-structor.dto';
+import { AddStructorInput, AddStructorOutput } from './dto/add-structor.dto';
+import { DeleteStructorInput, DeleteStructorOutput } from './dto/delete-structor.dto';
+import { FindAllRoundsOutput } from './dto/find-all-round.dto';
 import { Structor } from './entity/structors.entity';
 
 @Injectable()
@@ -18,6 +20,44 @@ export class StructorsService {
             return { ok: true };
         } catch (error) {
             return { ok: false, error };
+        }
+    }
+
+    async findAllRounds(): Promise<FindAllRoundsOutput>{
+        try {
+            const rounds = await this.structor.find()
+            return {
+                ok: true,
+                rounds
+            }
+        } catch (error) {
+            return {
+                ok: false,
+                error
+            }
+        }
+    }
+
+    async deleteStructor({structorId}: DeleteStructorInput): Promise<DeleteStructorOutput>{
+        try {
+            const structor = await this.structor.findOne({
+                where:{id:structorId}
+            })
+            if (!structor) {
+                return {
+                    ok: false,
+                    error: "There is no structor"
+                }
+            }
+            await this.structor.delete({ id: structor.id })
+            return {
+                ok:true
+            }
+        } catch (error) {
+            return {
+                ok: false,
+                error
+            }
         }
     }
 }

@@ -30,7 +30,7 @@ import { UpdatePostOutput, UpdatePostInput } from './dto/update-post.dto';
 import { Post } from './entity/post.entity';
 import { PostService } from './posts.service';
 
-@Resolver((of) => Post)
+@Resolver(() => Post)
 export class PostResolver {
   constructor(private readonly postService: PostService) {}
   @Mutation(() => CreatePostOutut)

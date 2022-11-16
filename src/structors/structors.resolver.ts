@@ -1,9 +1,11 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { AddStructorInput, AddStructorOutput } from './dtos/add-structor.dto';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { AddStructorInput, AddStructorOutput } from './dto/add-structor.dto';
+import { DeleteStructorInput, DeleteStructorOutput } from './dto/delete-structor.dto';
+import { FindAllRoundsOutput } from './dto/find-all-round.dto';
 import { Structor } from './entity/structors.entity';
 import { StructorsService } from './structors.service';
 
-@Resolver((of) => Structor)
+@Resolver(() => Structor)
 export class StructorsResolver {
     constructor(private readonly structorsService: StructorsService) { }
     @Mutation(() => AddStructorOutput)
@@ -11,5 +13,17 @@ export class StructorsResolver {
         @Args('input') addStructorInput: AddStructorInput,
     ): Promise<AddStructorOutput>{
         return await this.structorsService.addStructor(addStructorInput);
+    }
+
+    @Query(() => FindAllRoundsOutput)
+    async FindAllRounds(): Promise<FindAllRoundsOutput>{
+        return await this.structorsService.findAllRounds();
+    }
+
+    @Mutation(() => DeleteStructorOutput)
+    async DeleteStructor(
+        @Args('input') deleteStructorInput: DeleteStructorInput
+    ): Promise<DeleteStructorOutput>{
+        return await this.structorsService.deleteStructor(deleteStructorInput);
     }
 }
