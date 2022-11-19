@@ -20,6 +20,10 @@ import { jwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
 import { StructorsModule } from './structors/structors.module';
 import { Structor } from './structors/entity/structors.entity';
+import { Client } from './lectures/entities/client.entity';
+import { Detail_class_info } from './lectures/entities/detail_class_info.entity';
+import { Overall_class_info } from './lectures/entities/overall_class_info.entity';
+import { LectureMdoule } from './lectures/lectures.module';
 
 @Module({
   imports: [
@@ -58,7 +62,7 @@ import { Structor } from './structors/entity/structors.entity';
           }),
       synchronize: process.env.NODE_ENV === 'dev' ? true : false,
       logging: true,
-      entities: [User, Post, Comment, Structor],
+      entities: [User, Post, Comment, Structor, Client, Detail_class_info, Overall_class_info],
     }),
     GraphQLModule.forRoot({
       driver: ApolloDriver,
@@ -71,6 +75,7 @@ import { Structor } from './structors/entity/structors.entity';
     PostModule,
     AuthModule,
     StructorsModule,
+    LectureMdoule,
   ],
   controllers: [],
   providers: [],
