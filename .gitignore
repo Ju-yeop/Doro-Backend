@@ -140,5 +140,3 @@ dist
 # prettier
 .prettierignore
 
-#git.text.msg
-.gitmessage.txt
