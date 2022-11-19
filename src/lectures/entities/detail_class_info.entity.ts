@@ -17,15 +17,15 @@ export class Detail_class_info extends Core {
 
   @Column()
   @Field((type) => String)
-  date: String;
+  date: string;
 
   @Column()
   @Field((type) => String)
-  remark: String;
+  remark: string;
 
   @Column()
-  @Field((type) => boolean)
-  unfixed: Boolean;
+  @Field((type) => Boolean)
+  unfixed: boolean;
 
   @ManyToOne(
     (type) => Overall_class_info,

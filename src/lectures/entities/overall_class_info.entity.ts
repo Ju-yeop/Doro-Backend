@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { IsEnum, IsInt, isInt, IsNumber } from 'class-validator';
 import { Core } from 'src/common/entity/core.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
@@ -10,6 +10,8 @@ export enum SchoolRank {
   Middle = 'Middle',
   High = 'High',
 }
+
+registerEnumType(SchoolRank, { name: 'SchoolRank' });
 
 @Entity()
 @ObjectType()
