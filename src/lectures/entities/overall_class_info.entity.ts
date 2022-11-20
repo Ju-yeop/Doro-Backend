@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { Field, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { IsEnum, IsInt, isInt, IsNumber } from 'class-validator';
 import { Core } from 'src/common/entity/core.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
@@ -13,6 +13,7 @@ export enum SchoolRank {
 
 registerEnumType(SchoolRank, { name: 'SchoolRank' });
 
+@InputType({isAbstract:true})
 @Entity()
 @ObjectType()
 export class Overall_class_info extends Core {
@@ -35,6 +36,10 @@ export class Overall_class_info extends Core {
   @Field((type) => Int)
   @IsInt()
   budget: number;
+
+  @Column()
+  @Field((type) => String)
+  overall_remark: string;
 
   @ManyToOne((type) => Client, (client) => client.Overall_class_infos)
   @Field((type) => Client)

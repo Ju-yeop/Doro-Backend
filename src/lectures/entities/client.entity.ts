@@ -1,9 +1,10 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { IsEmail, IsString } from 'class-validator';
 import { Core } from 'src/common/entity/core.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { Overall_class_info } from './overall_class_info.entity';
 
+@InputType({isAbstract:true})
 @Entity()
 @ObjectType()
 export class Client extends Core {
