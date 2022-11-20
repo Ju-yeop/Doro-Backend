@@ -123,9 +123,21 @@ export class LectureService {
     }
   }
 
-  async findOverAllClasses(
-    findOverAllClassesInput: FindOverallClassesInput
+  async findOverallClasses(
+    {clientId}: FindOverallClassesInput
   ): Promise<FindOverallClassesOutput> {
-    return
+    try {
+      const overallClasses = await this.overall_class_info.find({ where: { client:{id:clientId} }, select: {Detail_class_infos:false} });
+      return {
+        ok: true,
+        overallClasses
+      }  
+    } catch (error) {
+      return {
+        ok: false,
+        error
+      }
+    }
+    
   }
 }

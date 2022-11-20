@@ -21,6 +21,6 @@ export class LectureResolver {
     async FindOverallClasses(
         @Args('input') findOverallClassesInput:FindOverallClassesInput
     ): Promise<FindOverallClassesOutput>{
-        return this.lectureService.findOverAllClasses(findOverallClassesInput);
+        return this.lectureService.findOverallClasses(findOverallClassesInput);
     }
 }
