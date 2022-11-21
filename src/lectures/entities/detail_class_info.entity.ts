@@ -1,10 +1,11 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { boolean } from 'joi';
 import { Core } from 'src/common/entity/core.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { Overall_class_info } from './overall_class_info.entity';
 
 @Entity()
+@InputType({ isAbstract: true })
 @ObjectType()
 export class Detail_class_info extends Core {
   @Column()
