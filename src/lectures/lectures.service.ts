@@ -1,14 +1,31 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, CACHE_MANAGER, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateEduInput, CreateEduOutput } from './dto/create-edu.dto';
 import { FindAllLecturesOutput } from './dto/find-all-lectures.dto';
-import { FindOverallClassInput, FindOverallClassOutput } from './dto/find-overall-class.dto';
-import { FindOverallClassesInput, FindOverallClassesOutput } from './dto/find-overall-classes.dto';
+import {
+  FindOverallClassInput,
+  FindOverallClassOutput,
+} from './dto/find-overall-class.dto';
+import {
+  FindOverallClassesInput,
+  FindOverallClassesOutput,
+} from './dto/find-overall-classes.dto';
+import {
+  CheckAuthNumInput,
+  CheckAuthNumOutput,
+} from './dtos/check-auth-num.dto';
+import {
+  SendAuthNumInput,
+  SendAuthNumOutput,
+  sendOption,
+} from './dtos/send-auth-num.dto';
 import { Client } from './entities/client.entity';
 import { Detail_class_info } from './entities/detail_class_info.entity';
 import { Overall_class_info } from './entities/overall_class_info.entity';
+import { RedisCacheService } from 'src/cache/redis-cache.service';
+import { SolapiMessageService } from 'solapi';
 
 @Injectable()
 export class LectureService {
@@ -18,7 +35,8 @@ export class LectureService {
     @InjectRepository(Detail_class_info)
     private detail_class_info: Repository<Detail_class_info>,
     @InjectRepository(Overall_class_info)
-    private overall_class_info: Repository<Overall_class_info>
+    private overall_class_info: Repository<Overall_class_info>,
+    private cacheManager: RedisCacheService
   ) {}
 
   async createEdu({
@@ -125,70 +143,131 @@ export class LectureService {
     }
   }
 
-  async findOverallClasses(
-    {clientId}: FindOverallClassesInput
-  ): Promise<FindOverallClassesOutput> {
+  async findOverallClasses({
+    clientId,
+  }: FindOverallClassesInput): Promise<FindOverallClassesOutput> {
     try {
-      const overallClasses = await this.overall_class_info.find({ where: { client:{id:clientId} }, select: {Detail_class_infos:false} });
+      const overallClasses = await this.overall_class_info.find({
+        where: { client: { id: clientId } },
+        select: { Detail_class_infos: false },
+      });
       return {
         ok: true,
-        overallClasses
-      }  
+        overallClasses,
+      };
     } catch (error) {
       return {
         ok: false,
-        error
-      }
+        error,
+      };
     }
   }
 
-  async findOverallClass(
-    {overall_Class_Id}: FindOverallClassInput
-  ): Promise<FindOverallClassOutput>{
+  async findOverallClass({
+    overall_Class_Id,
+  }: FindOverallClassInput): Promise<FindOverallClassOutput> {
     try {
-      const overallClass = await this.overall_class_info.findOne(
-        { where: { id: overall_Class_Id }, relations: ['Detail_class_infos' ,'client'] });
-      const client = await this.client.findOne(
-        { where: {id: overallClass.client.id}}
-      )
+      const overallClass = await this.overall_class_info.findOne({
+        where: { id: overall_Class_Id },
+        relations: ['Detail_class_infos', 'client'],
+      });
+      const client = await this.client.findOne({
+        where: { id: overallClass.client.id },
+      });
       if (!overallClass) {
         return {
           ok: false,
-          error: "신청하신 강의가 존재하지 않습니다.",
-        }
+          error: '신청하신 강의가 존재하지 않습니다.',
+        };
       }
       if (!client) {
         return {
           ok: false,
-          error: "잘못된 접근입니다."
-        }
+          error: '잘못된 접근입니다.',
+        };
       }
       return {
         ok: true,
         overallClass,
-        client
-      }
+        client,
+      };
     } catch (error) {
       return {
         ok: false,
-        error
-      }
+        error,
+      };
     }
   }
 
-  async findAllLectures(): Promise<FindAllLecturesOutput>{
+  async findAllLectures(): Promise<FindAllLecturesOutput> {
     try {
-      const results = await this.overall_class_info.find(
-        { relations: ['Detail_class_infos'] });
+      const results = await this.overall_class_info.find({
+        relations: ['Detail_class_infos'],
+      });
       return {
         ok: true,
-        results
-      }
+        results,
+      };
     } catch (error) {
       return {
         ok: false,
-        error
-      }
+        error,
+      };
     }
+  }
+  async sendAuthNum(
+    SendAuthNumInput: SendAuthNumInput
+  ): Promise<SendAuthNumOutput> {
+    if (SendAuthNumInput.Option === sendOption.mypage) {
+      //readbyuserid
+      return { ok: false, error: '유저가 존재하지 않습니다.' };
+    }
+
+    //랜덤 인증번호 생성
+    let randomNum = '';
+    for (let i = 0; i < 6; i++) {
+      randomNum += Math.floor(Math.random() * 10);
+    }
+
+    //redis 에 핸드폰번호: 인증번호로 저장
+    await this.cacheManager.set(
+      `${SendAuthNumInput.phoneNumber}`,
+      `${randomNum}`
+    );
+
+    //카카오 보내기 (임시 템플릿)
+    const messageService = new SolapiMessageService(
+      process.env.SOLAPIKEY,
+      process.env.SOLAPISECRETKEY
+    );
+
+    messageService
+      .sendOne({
+        to: '01075585082',
+        from: process.env.PHONE_NUMBER,
+        kakaoOptions: {
+          pfId: process.env.KAKAOPFID,
+          templateId: 'KA01TP221013112749783YFgBRxkPdcG',
+          disableSms: false,
+          adFlag: false,
+          variables: {
+            '#{성함}': randomNum,
+            '#{소속기관}': randomNum,
+            '#{연락처}': randomNum,
+            '#{글 제목}': randomNum,
+            '#{글 내용}': randomNum,
+            '#{url}': randomNum,
+          },
+        },
+        autoTypeDetect: true,
+      })
+      .then((res) => console.log(res));
+
+    return { ok: true };
+  }
+  async checkAuthNum(
+    CheckAuthNumInput: CheckAuthNumInput
+  ): Promise<CheckAuthNumOutput> {
+    return;
   }
 }

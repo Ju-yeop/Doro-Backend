@@ -24,6 +24,7 @@ import { Client } from './lectures/entities/client.entity';
 import { Detail_class_info } from './lectures/entities/detail_class_info.entity';
 import { Overall_class_info } from './lectures/entities/overall_class_info.entity';
 import { LectureMdoule } from './lectures/lectures.module';
+import { RedisCacheModule } from './cache/redis-cache.module';
 
 @Module({
   imports: [
@@ -62,7 +63,15 @@ import { LectureMdoule } from './lectures/lectures.module';
           }),
       synchronize: process.env.NODE_ENV === 'dev' ? true : false,
       logging: true,
-      entities: [User, Post, Comment, Structor, Client, Detail_class_info, Overall_class_info],
+      entities: [
+        User,
+        Post,
+        Comment,
+        Structor,
+        Client,
+        Detail_class_info,
+        Overall_class_info,
+      ],
     }),
     GraphQLModule.forRoot({
       driver: ApolloDriver,
@@ -71,6 +80,7 @@ import { LectureMdoule } from './lectures/lectures.module';
       autoSchemaFile: true,
       context: ({ req }) => ({ user: req['user'] }),
     }),
+    RedisCacheModule,
     UsersModule,
     PostModule,
     AuthModule,
