@@ -24,9 +24,6 @@ import { Client } from './lectures/entities/client.entity';
 import { Detail_class_info } from './lectures/entities/detail_class_info.entity';
 import { Overall_class_info } from './lectures/entities/overall_class_info.entity';
 import { LectureMdoule } from './lectures/lectures.module';
-import { redisStore } from 'cache-manager-redis-store';
-import { ClientOpts } from 'redis';
-import { CacheModule } from '@nestjs/common';
 import { RedisCacheModule } from './cache/redis-cache.module';
 
 @Module({

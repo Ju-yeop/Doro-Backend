@@ -5,7 +5,7 @@ import { RedisCacheService } from './redis-cache.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ envFilePath: `.env.dev` }),
     CacheModule.register({
       //@ts-ignore
       store: redisStore,
