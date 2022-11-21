@@ -49,6 +49,6 @@ export class Overall_class_info extends Core {
     (type) => Detail_class_info,
     (detail_class_info) => detail_class_info.Overall_class_info,
   )
-  @Field((type) => Detail_class_info)
+  @Field((type) => [Detail_class_info])
   Detail_class_infos?: Detail_class_info[];
 }

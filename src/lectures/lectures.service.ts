@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateEduInput, CreateEduOutput } from './dto/create-edu.dto';
+import { FindOverallClassInput, FindOverallClassOutput } from './dto/find-overall-class.dto';
 import { FindOverallClassesInput, FindOverallClassesOutput } from './dto/find-overall-classes.dto';
 import { Client } from './entities/client.entity';
 import { Detail_class_info } from './entities/detail_class_info.entity';
@@ -36,7 +37,6 @@ export class LectureService {
       const client = await this.client.findOne({
         where: { name, phone_number },
       });
-      console.log(client);
       if (!client) {
         // client가 없을 경우
         const newClient = this.client.create({
@@ -138,6 +138,30 @@ export class LectureService {
         error
       }
     }
-    
+  }
+
+  async findOverallClass(
+    {overall_Class_Id}: FindOverallClassInput
+  ): Promise<FindOverallClassOutput>{
+    try {
+      const overallClass = await this.overall_class_info.findOne(
+        { where: { id: overall_Class_Id }, relations: ['Detail_class_infos'] });
+      if (!overallClass) {
+        return {
+          ok: false,
+          error: "신청하신 강의가 존재하지 않습니다."
+        }
+      }
+      console.log(overallClass);
+      return {
+        ok: true,
+        overallClass
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        error
+      }
+    }
   }
 }
