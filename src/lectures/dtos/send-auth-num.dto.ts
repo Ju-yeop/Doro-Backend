@@ -1,11 +1,16 @@
-import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  InputType,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { CoreOutput } from 'src/common/dto/output.dto';
 
 export enum sendOption {
   auth = 'auth',
   mypage = 'mypage',
 }
-
+registerEnumType(sendOption, { name: 'sendOption' });
 @InputType()
 export class SendAuthNumInput {
   @Field((type) => String)
@@ -15,7 +20,7 @@ export class SendAuthNumInput {
   phoneNumber: string;
 
   @Field((type) => sendOption)
-  sendOption: sendOption;
+  Option: sendOption;
 }
 
 @ObjectType()

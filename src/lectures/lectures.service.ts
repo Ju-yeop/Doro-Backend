@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, CACHE_MANAGER, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -9,6 +9,7 @@ import { SendAuthNumInput, SendAuthNumOutput } from './dtos/send-auth-num.dto';
 import { Client } from './entities/client.entity';
 import { Detail_class_info } from './entities/detail_class_info.entity';
 import { Overall_class_info } from './entities/overall_class_info.entity';
+import { RedisCacheService } from 'src/cache/redis-cache.service';
 
 @Injectable()
 export class LectureService {
@@ -19,11 +20,12 @@ export class LectureService {
     private detail_class_info: Repository<Detail_class_info>,
     @InjectRepository(Overall_class_info)
     private overall_class_info: Repository<Overall_class_info>,
+    private cacheManager: RedisCacheService,
   ) {}
   async sendAuthNum(
     SendAuthNumInput: SendAuthNumInput,
   ): Promise<SendAuthNumOutput> {
-    return;
+    return { ok: true };
   }
   async checkAuthNum(
     CheckAuthNumInput: CheckAuthNumInput,
