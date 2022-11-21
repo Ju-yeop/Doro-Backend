@@ -1,5 +1,9 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { Role } from 'src/auth/role.decorator';
+import { User } from 'src/users/entities/user.entity';
 import { CreateEduInput, CreateEduOutput } from './dto/create-edu.dto';
+import { FindAllLecturesOutput } from './dto/find-all-lectures.dto';
 import { FindOverallClassInput, FindOverallClassOutput } from './dto/find-overall-class.dto';
 import { FindOverallClassesInput, FindOverallClassesOutput } from './dto/find-overall-classes.dto';
 import { Client } from './entities/client.entity';
@@ -30,5 +34,12 @@ export class LectureResolver {
         @Args('input') findOverallClassInput: FindOverallClassInput
     ): Promise<FindOverallClassOutput>{
         return this.lectureService.findOverallClass(findOverallClassInput);
+    }
+
+    @Query(() => FindAllLecturesOutput)
+    @Role(['Manager'])
+    async FindAllLectures(
+    ): Promise<FindAllLecturesOutput>{
+        return this.lectureService.findAllLectures();
     }
 }

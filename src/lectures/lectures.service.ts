@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateEduInput, CreateEduOutput } from './dto/create-edu.dto';
+import { FindAllLecturesOutput } from './dto/find-all-lectures.dto';
 import { FindOverallClassInput, FindOverallClassOutput } from './dto/find-overall-class.dto';
 import { FindOverallClassesInput, FindOverallClassesOutput } from './dto/find-overall-classes.dto';
 import { Client } from './entities/client.entity';
@@ -145,17 +147,42 @@ export class LectureService {
   ): Promise<FindOverallClassOutput>{
     try {
       const overallClass = await this.overall_class_info.findOne(
-        { where: { id: overall_Class_Id }, relations: ['Detail_class_infos'] });
+        { where: { id: overall_Class_Id }, relations: ['Detail_class_infos' ,'client'] });
+      const client = await this.client.findOne(
+        { where: {id: overallClass.client.id}}
+      )
       if (!overallClass) {
         return {
           ok: false,
-          error: "신청하신 강의가 존재하지 않습니다."
+          error: "신청하신 강의가 존재하지 않습니다.",
         }
       }
-      console.log(overallClass);
+      if (!client) {
+        return {
+          ok: false,
+          error: "잘못된 접근입니다."
+        }
+      }
       return {
         ok: true,
-        overallClass
+        overallClass,
+        client
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        error
+      }
+    }
+  }
+
+  async findAllLectures(): Promise<FindAllLecturesOutput>{
+    try {
+      const results = await this.overall_class_info.find(
+        { relations: ['Detail_class_infos'] });
+      return {
+        ok: true,
+        results
       }
     } catch (error) {
       return {

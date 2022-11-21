@@ -1,5 +1,6 @@
 import { Field, InputType, ObjectType, OmitType } from '@nestjs/graphql';
 import { CoreOutput } from 'src/common/dto/output.dto';
+import { Client } from '../entities/client.entity';
 import { Overall_class_info } from '../entities/overall_class_info.entity';
 
 @InputType()
@@ -11,5 +12,8 @@ export class FindOverallClassInput {
 @ObjectType()
 export class FindOverallClassOutput extends CoreOutput {
   @Field((type) => Overall_class_info, { nullable: true })
-  overallClass?: Overall_class_info;
+    overallClass?: Overall_class_info;
+    
+  @Field((type) => Client, {nullable: true})
+  client?: Client;
 }
