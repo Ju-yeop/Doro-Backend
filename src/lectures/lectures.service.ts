@@ -144,11 +144,11 @@ export class LectureService {
   }
 
   async findOverallClasses({
-    clientId,
+    phone_number, name
   }: FindOverallClassesInput): Promise<FindOverallClassesOutput> {
     try {
       const overallClasses = await this.overall_class_info.find({
-        where: { client: { id: clientId } },
+        where: { client: { name, phone_number } },
         select: { Detail_class_infos: false },
       });
       return {

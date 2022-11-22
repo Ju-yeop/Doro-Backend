@@ -7,8 +7,11 @@ export class Overall_Classes_Output_Item extends OmitType(Overall_class_info, ['
 
 @InputType()
 export class FindOverallClassesInput {
-  @Field((type) => Number)
-  clientId: number;
+  @Field((type) => String)
+  phone_number: string
+  
+  @Field((type) => String)
+  name: string
 }
 
 @ObjectType()
