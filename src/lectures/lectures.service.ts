@@ -26,6 +26,8 @@ import { Detail_class_info } from './entities/detail_class_info.entity';
 import { Overall_class_info } from './entities/overall_class_info.entity';
 import { RedisCacheService } from 'src/cache/redis-cache.service';
 import { SolapiMessageService } from 'solapi';
+import { DeleteOverallClassInput, DeleteOverallClassOutput } from './dto/delete-overall-class.dto';
+import { UpdateEduInput, UpdateEduOutput } from './dto/update-edu.dto';
 
 @Injectable()
 export class LectureService {
@@ -37,7 +39,7 @@ export class LectureService {
     @InjectRepository(Overall_class_info)
     private overall_class_info: Repository<Overall_class_info>,
     private cacheManager: RedisCacheService
-  ) {}
+  ) { }
 
   async createEdu({
     name,
@@ -144,11 +146,11 @@ export class LectureService {
   }
 
   async findOverallClasses({
-    clientId,
+    phone_number, name
   }: FindOverallClassesInput): Promise<FindOverallClassesOutput> {
     try {
       const overallClasses = await this.overall_class_info.find({
-        where: { client: { id: clientId } },
+        where: { client: { name, phone_number } },
         select: { Detail_class_infos: false },
       });
       return {
@@ -296,6 +298,76 @@ export class LectureService {
           ok: false,
           error: '인증번호가 일치하지 않습니다 다시 시도해 주세요',
         };
+      }
+    }
+  }
+
+  async deleteOverallClassInput(
+    { overallClassId }: DeleteOverallClassInput
+  ): Promise<DeleteOverallClassOutput> {
+    try {
+      const targetClass = await this.overall_class_info.findOne({
+        where: {
+          id: overallClassId,
+        },
+      });
+      if (!targetClass) {
+        return {
+          ok: false,
+          error: '신청 내역이 없습니다',
+        };
+      }
+      await this.overall_class_info.delete({ id: overallClassId });
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error
+      };
+      
+    }
+  }
+
+  async updateEdu(
+    {overallId, detail_classes, overall_class}: UpdateEduInput
+  ): Promise<UpdateEduOutput>{
+    try {
+      const old_overall = await this.overall_class_info.findOne(
+        { where: { id: overallId } });
+      if (!old_overall) {
+        return {
+          ok: false,
+          error: "시스템 에러"
+        }
+      }
+      await this.overall_class_info.update(overallId, { ...overall_class })
+
+      const details = await this.detail_class_info.find(
+        {
+          where: { Overall_class_info: { id: overallId } },
+          select: { id: true }
+        });
+      if (details) {
+        for (const detail of details) {
+          await this.detail_class_info.delete({id:detail.id})
+        }
+      }
+      for (const item of detail_classes) {
+        await this.detail_class_info.save(
+          this.detail_class_info.create({
+            ...item,
+            Overall_class_info: old_overall,
+          }));
+      }
+      return {
+        ok: true
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        error
       }
     }
   }

@@ -38,8 +38,8 @@ export class Overall_class_info extends Core {
   budget: number;
 
   @Column()
-  @Field((type) => String)
-  overall_remark: string;
+  @Field((type) => String, {nullable: true, defaultValue:null})
+  overall_remark?: string;
 
   @ManyToOne((type) => Client, (client) => client.Overall_class_infos)
   @Field((type) => Client)

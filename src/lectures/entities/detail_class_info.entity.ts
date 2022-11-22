@@ -21,8 +21,8 @@ export class Detail_class_info extends Core {
   date: string;
 
   @Column()
-  @Field((type) => String)
-  remark: string;
+  @Field((type) => String, {nullable: true, defaultValue:null})
+  remark?: string;
 
   @Column()
   @Field((type) => Boolean)
