@@ -218,9 +218,19 @@ export class LectureService {
   async sendAuthNum(
     SendAuthNumInput: SendAuthNumInput
   ): Promise<SendAuthNumOutput> {
+    //mypage 조회시 유저 존재 여부 확인
     if (SendAuthNumInput.Option === sendOption.mypage) {
-      //readbyuserid
-      return { ok: false, error: '유저가 존재하지 않습니다.' };
+      const client = await this.client.findOne({
+        where: {
+          name: SendAuthNumInput.name,
+          phone_number: SendAuthNumInput.phoneNumber,
+        },
+      });
+      if (!client) {
+        console.log('fasle');
+        return { ok: false, error: '유저가 존재하지 않습니다.' };
+      }
+      console.log('pass');
     }
 
     //랜덤 인증번호 생성
@@ -236,38 +246,57 @@ export class LectureService {
     );
 
     //카카오 보내기 (임시 템플릿)
-    const messageService = new SolapiMessageService(
-      process.env.SOLAPIKEY,
-      process.env.SOLAPISECRETKEY
-    );
+    // const messageService = new SolapiMessageService(
+    //   process.env.SOLAPIKEY,
+    //   process.env.SOLAPISECRETKEY
+    // );
 
-    messageService
-      .sendOne({
-        to: '01075585082',
-        from: process.env.PHONE_NUMBER,
-        kakaoOptions: {
-          pfId: process.env.KAKAOPFID,
-          templateId: 'KA01TP221013112749783YFgBRxkPdcG',
-          disableSms: false,
-          adFlag: false,
-          variables: {
-            '#{성함}': randomNum,
-            '#{소속기관}': randomNum,
-            '#{연락처}': randomNum,
-            '#{글 제목}': randomNum,
-            '#{글 내용}': randomNum,
-            '#{url}': randomNum,
-          },
-        },
-        autoTypeDetect: true,
-      })
-      .then((res) => console.log(res));
+    // messageService
+    //   .sendOne({
+    //     to: '01075585082',
+    //     from: process.env.PHONE_NUMBER,
+    //     kakaoOptions: {
+    //       pfId: process.env.KAKAOPFID,
+    //       templateId: 'KA01TP221013112749783YFgBRxkPdcG',
+    //       disableSms: false,
+    //       adFlag: false,
+    //       variables: {
+    //         '#{성함}': randomNum,
+    //         '#{소속기관}': randomNum,
+    //         '#{연락처}': randomNum,
+    //         '#{글 제목}': randomNum,
+    //         '#{글 내용}': randomNum,
+    //         '#{url}': randomNum,
+    //       },
+    //     },
+    //     autoTypeDetect: true,
+    //   })
+    //   .then((res) => console.log(res));
 
     return { ok: true };
   }
   async checkAuthNum(
     CheckAuthNumInput: CheckAuthNumInput
   ): Promise<CheckAuthNumOutput> {
-    return;
+    const authNum = await this.cacheManager.get(
+      `${CheckAuthNumInput.phoneNumber}`
+    );
+    if (!authNum) {
+      return {
+        ok: false,
+        error: '인증번호가 없습니다 재전송을 눌러주세요',
+      };
+    } else {
+      if (authNum === CheckAuthNumInput.authNum) {
+        return {
+          ok: true,
+        };
+      } else {
+        return {
+          ok: false,
+          error: '인증번호가 일치하지 않습니다 다시 시도해 주세요',
+        };
+      }
+    }
   }
 }
