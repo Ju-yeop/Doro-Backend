@@ -26,7 +26,10 @@ import { Detail_class_info } from './entities/detail_class_info.entity';
 import { Overall_class_info } from './entities/overall_class_info.entity';
 import { RedisCacheService } from 'src/cache/redis-cache.service';
 import { SolapiMessageService } from 'solapi';
-import { DeleteOverallClassInput, DeleteOverallClassOutput } from './dto/delete-overall-class.dto';
+import {
+  DeleteOverallClassInput,
+  DeleteOverallClassOutput,
+} from './dto/delete-overall-class.dto';
 import { UpdateEduInput, UpdateEduOutput } from './dto/update-edu.dto';
 
 @Injectable()
@@ -39,7 +42,7 @@ export class LectureService {
     @InjectRepository(Overall_class_info)
     private overall_class_info: Repository<Overall_class_info>,
     private cacheManager: RedisCacheService
-  ) { }
+  ) {}
 
   async createEdu({
     name,
@@ -146,7 +149,8 @@ export class LectureService {
   }
 
   async findOverallClasses({
-    phone_number, name
+    phone_number,
+    name,
   }: FindOverallClassesInput): Promise<FindOverallClassesOutput> {
     try {
       const overallClasses = await this.overall_class_info.find({
@@ -248,32 +252,27 @@ export class LectureService {
     );
 
     //카카오 보내기 (임시 템플릿)
-    // const messageService = new SolapiMessageService(
-    //   process.env.SOLAPIKEY,
-    //   process.env.SOLAPISECRETKEY
-    // );
+    const messageService = new SolapiMessageService(
+      process.env.SOLAPIKEY,
+      process.env.SOLAPISECRETKEY
+    );
 
-    // messageService
-    //   .sendOne({
-    //     to: '01075585082',
-    //     from: process.env.PHONE_NUMBER,
-    //     kakaoOptions: {
-    //       pfId: process.env.KAKAOPFID,
-    //       templateId: 'KA01TP221013112749783YFgBRxkPdcG',
-    //       disableSms: false,
-    //       adFlag: false,
-    //       variables: {
-    //         '#{성함}': randomNum,
-    //         '#{소속기관}': randomNum,
-    //         '#{연락처}': randomNum,
-    //         '#{글 제목}': randomNum,
-    //         '#{글 내용}': randomNum,
-    //         '#{url}': randomNum,
-    //       },
-    //     },
-    //     autoTypeDetect: true,
-    //   })
-    //   .then((res) => console.log(res));
+    messageService
+      .sendOne({
+        to: SendAuthNumInput.phoneNumber,
+        from: process.env.PHONE_NUMBER,
+        kakaoOptions: {
+          pfId: process.env.KAKAOPFID,
+          templateId: 'KA01TP221122102256138lqFxmnHR9q2',
+          disableSms: false,
+          adFlag: false,
+          variables: {
+            '#{인증번호}': randomNum,
+          },
+        },
+        autoTypeDetect: true,
+      })
+      .then((res) => console.log(res));
 
     return { ok: true };
   }
@@ -302,9 +301,9 @@ export class LectureService {
     }
   }
 
-  async deleteOverallClassInput(
-    { overallClassId }: DeleteOverallClassInput
-  ): Promise<DeleteOverallClassOutput> {
+  async deleteOverallClassInput({
+    overallClassId,
+  }: DeleteOverallClassInput): Promise<DeleteOverallClassOutput> {
     try {
       const targetClass = await this.overall_class_info.findOne({
         where: {
@@ -324,34 +323,35 @@ export class LectureService {
     } catch (error) {
       return {
         ok: false,
-        error
+        error,
       };
-      
     }
   }
 
-  async updateEdu(
-    {overallId, detail_classes, overall_class}: UpdateEduInput
-  ): Promise<UpdateEduOutput>{
+  async updateEdu({
+    overallId,
+    detail_classes,
+    overall_class,
+  }: UpdateEduInput): Promise<UpdateEduOutput> {
     try {
-      const old_overall = await this.overall_class_info.findOne(
-        { where: { id: overallId } });
+      const old_overall = await this.overall_class_info.findOne({
+        where: { id: overallId },
+      });
       if (!old_overall) {
         return {
           ok: false,
-          error: "시스템 에러"
-        }
+          error: '시스템 에러',
+        };
       }
-      await this.overall_class_info.update(overallId, { ...overall_class })
+      await this.overall_class_info.update(overallId, { ...overall_class });
 
-      const details = await this.detail_class_info.find(
-        {
-          where: { Overall_class_info: { id: overallId } },
-          select: { id: true }
-        });
+      const details = await this.detail_class_info.find({
+        where: { Overall_class_info: { id: overallId } },
+        select: { id: true },
+      });
       if (details) {
         for (const detail of details) {
-          await this.detail_class_info.delete({id:detail.id})
+          await this.detail_class_info.delete({ id: detail.id });
         }
       }
       for (const item of detail_classes) {
@@ -359,16 +359,17 @@ export class LectureService {
           this.detail_class_info.create({
             ...item,
             Overall_class_info: old_overall,
-          }));
+          })
+        );
       }
       return {
-        ok: true
-      }
+        ok: true,
+      };
     } catch (error) {
       return {
         ok: false,
-        error
-      }
+        error,
+      };
     }
   }
 }
