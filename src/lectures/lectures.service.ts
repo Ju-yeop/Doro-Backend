@@ -52,7 +52,6 @@ export class LectureService {
     email,
     student_count,
     school_rank,
-    grade,
     budget,
     overall_remark,
     detail_classes,
@@ -113,7 +112,6 @@ export class LectureService {
       const overall_class = overall_class_info.create({
         student_count,
         school_rank,
-        grade,
         budget,
         overall_remark,
         client: client_arg,
