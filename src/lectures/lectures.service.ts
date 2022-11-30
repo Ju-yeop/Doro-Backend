@@ -124,6 +124,7 @@ export class LectureService {
       for (const item of detail_classes) {
         const detail_class = detail_class_info.create({
           class_name: item.class_name,
+          edu_concept:item.edu_concept,
           student_number: item.student_number,
           date: item.date,
           remark: item.remark,
