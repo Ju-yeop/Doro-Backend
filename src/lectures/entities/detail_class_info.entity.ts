@@ -13,6 +13,10 @@ export class Detail_class_info extends Core {
   class_name: string;
 
   @Column()
+  @Field((type) => String)
+  edu_concept: string;
+
+  @Column()
   @Field((type) => Int)
   student_number: number;
 
