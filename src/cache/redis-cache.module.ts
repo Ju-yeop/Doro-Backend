@@ -1,12 +1,13 @@
+import type { ClientOpts } from 'redis';
 import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import * as redisStore from 'cache-manager-ioredis';
+import redisStore from 'cache-manager-redis-store';
 import { RedisCacheService } from './redis-cache.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: `.env.dev` }),
-    CacheModule.register({
+    CacheModule.register<ClientOpts>({
       //@ts-ignore
       store: redisStore,
       host: process.env.REDIS_HOST,
