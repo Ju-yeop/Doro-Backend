@@ -10,7 +10,7 @@ export class RedisCacheService {
   }
 
   async set(key: string, value: any, option?: any) {
-    await this.cache.set(key, value, { ttl: 3000 });
+    await this.cache.set(key, value, { ttl: 3000 } as any);
   }
 
   async reset() {
