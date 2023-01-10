@@ -34,7 +34,9 @@ export class Overall_class_info extends Core {
   @Field((type) => String, { nullable: true, defaultValue: null })
   overall_remark?: string;
 
-  @ManyToOne((type) => Client, (client) => client.Overall_class_infos)
+  @ManyToOne((type) => Client, (client) => client.Overall_class_infos, {
+    eager: true,
+  })
   @Field((type) => Client)
   client: Client;
 
