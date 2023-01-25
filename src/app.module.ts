@@ -61,7 +61,7 @@ import { RedisCacheModule } from './cache/redis-cache.module';
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME,
           }),
-      synchronize: true, //process.env.NODE_ENV === 'dev' ? true : false,
+      synchronize: process.env.NODE_ENV === 'dev' ? true : false,
       logging: true,
       entities: [
         User,
