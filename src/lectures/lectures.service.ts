@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, CACHE_MANAGER, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
@@ -124,7 +125,7 @@ export class LectureService {
       for (const item of detail_classes) {
         const detail_class = detail_class_info.create({
           class_name: item.class_name,
-          edu_concept:item.edu_concept,
+          edu_concept: item.edu_concept,
           student_number: item.student_number,
           date: item.date,
           remark: item.remark,

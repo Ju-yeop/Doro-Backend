@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { boolean } from 'joi';
 import { Core } from 'src/common/entity/core.entity';
@@ -20,12 +21,12 @@ export class Detail_class_info extends Core {
   @Field((type) => Int)
   student_number: number;
 
-  @Column()
-  @Field((type) => String)
-  date: string;
+  @Column('date', { array: true })
+  @Field((type) => [Date])
+  date: Date[];
 
   @Column()
-  @Field((type) => String, {nullable: true, defaultValue:null})
+  @Field((type) => String, { nullable: true, defaultValue: null })
   remark?: string;
 
   @Column()
@@ -37,7 +38,7 @@ export class Detail_class_info extends Core {
     (overall_class_info) => overall_class_info.Detail_class_infos,
     {
       onDelete: 'CASCADE',
-    },
+    }
   )
   @Field((type) => Overall_class_info)
   Overall_class_info: Overall_class_info;
